@@ -129,7 +129,7 @@
       <arg name="anchor" type="uint"/>
     </request>
 
-    <request  name="set_exclusive_zone">
+    <request name="set_exclusive_zone">
       <description summary="configures the exclusive geometry of this surface">
         Requests that the compositor avoids occluding an area of the surface
         with other surfaces. The compositor's use of this information is
@@ -141,6 +141,15 @@
         exclusive.
       </description>
       <arg name="zone" type="uint"/>
+    </request>
+
+    <request name="set_margin">
+      <description summary="sets a margin from the anchor point">
+        Requests that the surface be placed some distance away from the anchor
+        point on the output, in pixels.
+      </description>
+      <arg name="horizontal" type="uint"/>
+      <arg name="vertical" type="uint"/>
     </request>
   </interface>
 
