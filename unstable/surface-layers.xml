@@ -105,24 +105,12 @@
       <arg name="types" type="uint" summary="mask of input devices to use"/>
     </request>
 
-    <request name="set_position">
-      <description summary="configures the location of the surface">
-        Sets the position of the surface in the layer in the wl_output's
-        physical hardware coordinates (that is, within the range of 0 to the
-        width of the wl_output given by wl_output.mode, inclusive). The size of
-        the surface is taken from the size of the attached buffer.
-      </description>
-      <arg name="x" type="uint"/>
-      <arg name="y" type="uint"/>
-    </request>
-
     <enum name="anchor">
       <description summary="corners to anchor surfaces to">
-        You may use these anchor points to attach your surface to the corner of
-        an output instead of manually positioning it.
+        Specifies the corners and edges of an output that you may anchor the
+        surface to.
       </description>
 
-      <entry name="manual" value="0" summary="surface is manually positioned via layer_surface.position"/>
       <entry name="top_left" value="1"/>
       <entry name="top" value="2"/>
       <entry name="top_right" value="3"/>
@@ -135,9 +123,8 @@
 
     <request name="set_anchor">
       <description summary="configures the anchor point of the surface">
-        Instead of using manual positioning, you may set an anchor point to have
-        the surface positioned in the specified corner of the output. This
-        setting overrides the values given via set_position.
+        Requests that the compositor anchor the surface to the specified corner
+        or edge.
       </description>
       <arg name="anchor" type="uint"/>
     </request>
