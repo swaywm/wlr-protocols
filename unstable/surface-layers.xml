@@ -97,7 +97,7 @@
     <request name="set_interactivity">
       <description summary="indicates that this surface is interactive">
         This request indicates to the compositor what kind of interactivity this
-        surface requires. This may be chagned at runtime. Note that whether or
+        surface requires. This may be changed at runtime. Note that whether or
         not the compositor chooses to send the surface input events at any given
         time is implementation defined. Any events from input devices you do not
         ask for will be passed along to other clients, also in an implementation
