@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vim: set ts=2 sw=2 et tw=80 formatoptions+=t : -->
+<protocol name="input_simulation">
+
+  <copyright>
+    Copyright © 2017 Drew DeVault
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+
+  <interface name="input_simulation" version="1">
+    <description summary="simulates global input events">
+      This protocol allows clients to simulate input events, which the
+      compositor will process normally. These events could be passed to other
+      clients, trigger keybindings in the compositor, etc. Note that real input
+      events will continue to be processed while simulators are in use.
+    </description>
+
+    <request name="get_keyboard_simulator">
+      <descripton summary="create an input_simulator for a wl_keyboard">
+        Creates an interface that can be used to simulate keyboard input events.
+      </description>
+      <arg name="id" type="new_id" interface="keyboard_simulator"/>
+      <arg name="keyboard" type="object" interface="wl_keyboard"/>
+    </request>
+  </interface>
+
+  <interface name="keyboard_simulator" version="1">
+    <description summary="layer metadata interface">
+      An interface that may be implemented by a wl_keyboard, which allows
+      clients to simulate input events from them.
+    </description>
+
+    <request name="destroy" type="destructor" />
+
+    <request name="key">
+      <description summary="simulates a key event">
+        Raises a wl_keyboard.key event on the focused client(s), or processes
+        the key for the compositor's internal use. The compositor will assign a
+        serial and time appropriately when the event is emitted.
+      </description>
+      <arg name="key" type="uint"/>
+      <arg name="state" type="uint"/>
+    </request>
+
+    <request name="modifiers">
+      <description summary="simulates a modifiers event">
+        Raises a wl_keyboard.modifiers event on the focused client(s), or
+        processes the key for the compositor's internal use. The compositor will
+        assign a serial appropriately when the event is emitted.
+      </description>
+      <arg name="mods_depressed" type="uint"/>
+      <arg name="mods_latched" type="uint"/>
+      <arg name="mods_locked" type="uint"/>
+      <arg name="group" type="uint"/>
+    </request>
+  </interface>
+
+</protocol>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- vim: set ts=2 sw=2 et tw=80 formatoptions+=t : -->
+<protocol name="surface_layers">
+
+  <copyright>
+    Copyright © 2017 Drew DeVault
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+
+  <interface name="surface_layers" version="1">
+    <description summary="create surfaces that are layers of the desktop">
+      Clients can use this interface to assign the surface_layer role to a
+      wl_surfaces. These surfaces are assigned a size by the compositor
+      (generally understood to be the size of the output) and are rendered with
+      a z-depth that corresponds to the layer they are among.
+    </description>
+
+    <enum name="surface_layer">
+      <description summary="available layers for surfaces">
+        These values indicate which layers a surface can be rendered in. They
+        are ordered by z depth, bottom-most first. Typically shell surfaces will
+        be rendered between the bottom and top layers. Multiple surfaces can
+        share a single layer.
+      </description>
+
+      <entry name="background" value="0"/>
+      <entry name="bottom" value="1"/>
+      <entry name="top" value="2"/>
+      <entry name="overlay" value="3"/>
+    </enum>
+
+    <request name="get_layer_surface">
+      <descripton summary="create a layer_surface from a surface">
+        Create a layer surface for an existing surface. This assigns the role of
+        layer_surface, or raises a protocol error if another role is already
+        assigned.
+
+        Exclusivity allows you to instruct the compositor to avoid arranging
+        other surfaces on top of this surface. For example, a compositor may
+        avoid occluding your surface when the user maximizes a shell surface.
+        However, compositors are permitted to ignore this flag under any
+        circumstances they wish.
+      </description>
+      <arg name="id" type="new_id" interface="layer_surface"/>
+      <arg name="surface" type="object" interface="wl_surface"/>
+      <arg name="output" type="object" interface="wl_output"/>
+      <arg name="layer" type="uint" summary="surface_layer to add this surface to"/>
+      <arg name="exclusive" type="uint" summary="1 to avoid occluding this surface, 0 otherwise"/>
+    </request>
+  </interface>
+
+  <interface name="layer_surface" version="1">
+    <description summary="layer metadata interface">
+      An interface that may be implemented by a wl_surface, for surfaces that
+      are designed to be rendered as a layer of a stacked desktop-like
+      environment.
+    </description>
+
+    <request name="destroy" type="destructor">
+      <description summary="remove xdg_surface interface">
+        The layer_surface interface is removed from the wl_surface object and
+        the surface loses the layer_surface role.
+      </description>
+    </request>
+
+    <enum name="input_devices">
+      <descripton summary="types of input devices">
+        These flags are a bitfield and are used by set_interactive to specify
+        what sorts of input the surface should interact with.
+      </description>
+      <arg name="none" value="0x0" />
+      <arg name="pointer" value="0x1" />
+      <arg name="keyboard" value="0x2" />
+      <arg name="touch" value="0x4" />
+    </enum>
+
+    <request name="set_interactivity">
+      <description summary="indicates that this surface is interactive">
+        This request indicates to the compositor what kind of interactivity this
+        surface requires. This may be chagned at runtime. Note that whether or
+        not the compositor chooses to send the surface input events at any given
+        time is implementation defined. Any events from input devices you do not
+        ask for will be passed along to other clients, also in an implementation
+        defined way.
+
+        By convention, conventional compositors will send input events to
+        surfaces below the shell surface layer when there are no shell surfaces
+        or when the surface is clicked (and thus receives focus). Above the
+        shell surface layer, the topmost surface receives all input of the types
+        it requests.
+      </description>
+      <arg name="types" type="uint" summary="mask of input devices to use"/>
+    </request>
+
+    <request name="position">
+      <description summary="configures the location of the surface">
+        Sets the position of the surface in the layer in the wl_output's
+        physical hardware coordinates (that is, within the range of 0 to the
+        width of the wl_output given by wl_output.mode, inclusive). The size of
+        the surface is taken from the size of the attached buffer.
+      </description>
+      <arg name="x" type="uint"/>
+      <arg name="y" type="uint"/>
+    </request>
+  </interface>
+
+</protocol>
