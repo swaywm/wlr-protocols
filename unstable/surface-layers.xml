@@ -124,7 +124,8 @@
     <request name="set_anchor">
       <description summary="configures the anchor point of the surface">
         Requests that the compositor anchor the surface to the specified corner
-        or edge.
+        or edge. If your surface is not exclusive, it will be positioned with
+        respect to other exclusive surfaces (that is, it won't occlude them).
       </description>
       <arg name="anchor" type="uint"/>
     </request>
