@@ -27,6 +27,10 @@ specific z depth. This protocol should support use-cases like:
 - dmenu/rofi
 - slop
 
+[Protocol](https://github.com/SirCmpwn/sway-protocols/blob/master/unstable/surface-layers.xml)
+
+[Discussion](https://github.com/SirCmpwn/sway-protocols/issues/1)
+
 ## input-injection
 
 Allows clients to simulate fake inputs that the compositor will treat like real
@@ -35,3 +39,7 @@ ones and send to other clients and such. Should support use-cases like:
 - on screen keyboards
 - input scripting
 - xcape-style stuff
+
+[Protocol](https://github.com/SirCmpwn/sway-protocols/blob/master/unstable/input-injection.xml)
+
+[Discussion](https://github.com/SirCmpwn/sway-protocols/issues/2)
