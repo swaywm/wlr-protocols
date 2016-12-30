@@ -54,18 +54,11 @@
         Create a layer surface for an existing surface. This assigns the role of
         layer_surface, or raises a protocol error if another role is already
         assigned.
-
-        Exclusivity allows you to instruct the compositor to avoid arranging
-        other surfaces on top of this surface. For example, a compositor may
-        avoid occluding your surface when the user maximizes a shell surface.
-        However, compositors are permitted to ignore this flag under any
-        circumstances they wish.
       </description>
       <arg name="id" type="new_id" interface="layer_surface"/>
       <arg name="surface" type="object" interface="wl_surface"/>
       <arg name="output" type="object" interface="wl_output"/>
       <arg name="layer" type="uint" summary="surface_layer to add this surface to"/>
-      <arg name="exclusive" type="uint" summary="1 to avoid occluding this surface, 0 otherwise"/>
     </request>
   </interface>
 
@@ -112,7 +105,7 @@
       <arg name="types" type="uint" summary="mask of input devices to use"/>
     </request>
 
-    <request name="position">
+    <request name="set_position">
       <description summary="configures the location of the surface">
         Sets the position of the surface in the layer in the wl_output's
         physical hardware coordinates (that is, within the range of 0 to the
@@ -121,6 +114,46 @@
       </description>
       <arg name="x" type="uint"/>
       <arg name="y" type="uint"/>
+    </request>
+
+    <enum name="anchor">
+      <description summary="corners to anchor surfaces to">
+        You may use these anchor points to attach your surface to the corner of
+        an output instead of manually positioning it.
+      </description>
+
+      <entry name="manual" value="0" summary="surface is manually positioned via layer_surface.position"/>
+      <entry name="top_left" value="1"/>
+      <entry name="top" value="2"/>
+      <entry name="top_right" value="3"/>
+      <entry name="right" value="4"/>
+      <entry name="bottom_right" value="5"/>
+      <entry name="bottom" value="6"/>
+      <entry name="bottom_left" value="7"/>
+      <entry name="left" value="8"/>
+    </enum>
+
+    <request name="set_anchor">
+      <description summary="configures the anchor point of the surface">
+        Instead of using manual positioning, you may set an anchor point to have
+        the surface positioned in the specified corner of the output. This
+        setting overrides the values given via set_position.
+      </description>
+      <arg name="anchor" type="uint"/>
+    </request>
+
+    <request  name="set_exclusive_zone">
+      <description summary="configures the exclusive geometry of this surface">
+        Requests that the compositor avoids occluding an area of the surface
+        with other surfaces. The compositor's use of this information is
+        implementation defined - do not assume that this region will not
+        actually be occluded.
+
+        This value is only meaningful if the surface is anchored to an edge. The
+        zone is the number of pixels from the edge that are considered
+        exclusive.
+      </description>
+      <arg name="zone" type="uint"/>
     </request>
   </interface>
 
