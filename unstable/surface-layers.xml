@@ -41,8 +41,10 @@
       <description summary="available layers for surfaces">
         These values indicate which layers a surface can be rendered in. They
         are ordered by z depth, bottom-most first. Traditional shell surfaces
-        will typically be rendered between the bottom and top layers. Multiple
-        surfaces can share a single layer.
+        will typically be rendered between the bottom and top layers.
+        Fullscreen shell surfaces are typically rendered at the top layer.
+        Multiple surfaces can share a single layer, and ordering within a
+        single layer is undefined.
       </description>
 
       <entry name="background" value="0"/>
@@ -76,28 +78,23 @@
         These flags are a bitfield and are used by set_interactive to specify
         what sorts of input the surface should interact with.
       </description>
-      <arg name="none" value="0x0" />
-      <arg name="pointer" value="0x1" />
-      <arg name="keyboard" value="0x2" />
-      <arg name="touch" value="0x4" />
+      <arg name="none" value="0" />
+      <arg name="pointer" value="1" />
+      <arg name="keyboard" value="2" />
+      <arg name="touch" value="4" />
     </enum>
 
     <request name="set_interactivity">
       <description summary="indicates that this surface is interactive">
-        This request indicates to the compositor what kind of interactivity this
-        surface requires. This may be changed at runtime. Note that whether or
-        not the compositor chooses to send the surface input events at any given
-        time is implementation-dependent. Any events from input devices you do not
-        ask for will be passed along to other clients, also in an
-        implementation-dependent way.
-
-        By convention, conventional compositors will send input events to
-        surfaces below the shell surface layer when there are no shell surfaces
-        or when the surface is clicked (and thus receives focus). Above the
-        shell surface layer, the topmost surface receives all input of the types
-        it requests.
+        This request indicates to the compositor what kind of interactivity
+        this surface requires. This may be changed at runtime. Any inputs
+        included in exclusive_types will not be given to other clients at lower
+        depths. The compositor may choose under which circumstances to send
+        inputs. By convention, the compositor will send input events to
+        the top-most surface of the top-most layer.
       </description>
-      <arg name="types" type="uint" summary="mask of input devices to use"/>
+      <arg name="input_types" type="uint" summary="mask of input devices to use"/>
+      <arg name="exclusive_types" type="uint" summary="mask of input devices to use exclusively"/>
     </request>
 
     <enum name="anchor" bitfield="true">
