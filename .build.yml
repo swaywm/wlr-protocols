@@ -1,0 +1,11 @@
+image: archlinux
+packages:
+  - wayland
+sources:
+  - https://git.sr.ht/~sircmpwn/sway-protocols
+tasks:
+  - protocols: |
+      cd sway-protocols
+      wayland-scanner client-header < unstable/surface-layers.xml
+      wayland-scanner server-header < unstable/surface-layers.xml
+      wayland-scanner code < unstable/surface-layers.xml
