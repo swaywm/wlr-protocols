@@ -54,7 +54,7 @@
     </enum>
 
     <request name="get_layer_surface">
-      <descripton summary="create a layer_surface from a surface">
+      <description summary="create a layer_surface from a surface">
         Create a layer surface for an existing surface. This assigns the role of
         layer_surface, or raises a protocol error if another role is already
         assigned.
@@ -74,7 +74,7 @@
     </description>
 
     <enum name="input_devices">
-      <descripton summary="types of input devices">
+      <description summary="types of input devices">
         These flags are a bitfield and are used by set_interactive to specify
         what sorts of input the surface should interact with.
       </description>
