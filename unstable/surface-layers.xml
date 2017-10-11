@@ -37,6 +37,18 @@
       that interact with the desktop.
     </description>
 
+    <request name="get_layer_surface">
+      <description summary="create a layer_surface from a surface">
+        Create a layer surface for an existing surface. This assigns the role of
+        layer_surface, or raises a protocol error if another role is already
+        assigned.
+      </description>
+      <arg name="id" type="new_id" interface="layer_surface"/>
+      <arg name="surface" type="object" interface="wl_surface"/>
+      <arg name="output" type="object" interface="wl_output"/>
+      <arg name="layer" type="uint" summary="surface_layer to add this surface to"/>
+    </request>
+
     <enum name="surface_layer">
       <description summary="available layers for surfaces">
         These values indicate which layers a surface can be rendered in. They
@@ -52,18 +64,6 @@
       <entry name="top" value="2"/>
       <entry name="overlay" value="3"/>
     </enum>
-
-    <request name="get_layer_surface">
-      <description summary="create a layer_surface from a surface">
-        Create a layer surface for an existing surface. This assigns the role of
-        layer_surface, or raises a protocol error if another role is already
-        assigned.
-      </description>
-      <arg name="id" type="new_id" interface="layer_surface"/>
-      <arg name="surface" type="object" interface="wl_surface"/>
-      <arg name="output" type="object" interface="wl_output"/>
-      <arg name="layer" type="uint" summary="surface_layer to add this surface to"/>
-    </request>
   </interface>
 
   <interface name="layer_surface" version="1">
@@ -72,17 +72,6 @@
       are designed to be rendered as a layer of a stacked desktop-like
       environment.
     </description>
-
-    <enum name="input_devices">
-      <description summary="types of input devices">
-        These flags are a bitfield and are used by set_interactive to specify
-        what sorts of input the surface should interact with.
-      </description>
-      <arg name="none" value="0" />
-      <arg name="pointer" value="1" />
-      <arg name="keyboard" value="2" />
-      <arg name="touch" value="4" />
-    </enum>
 
     <request name="set_interactivity">
       <description summary="indicates that this surface is interactive">
@@ -96,19 +85,6 @@
       <arg name="input_types" type="uint" summary="mask of input devices to use"/>
       <arg name="exclusive_types" type="uint" summary="mask of input devices to use exclusively"/>
     </request>
-
-    <enum name="anchor" bitfield="true">
-      <entry name="none" value="0"
-       summary="the center of the anchor rectangle"/>
-      <entry name="top" value="1"
-       summary="the top edge of the anchor rectangle"/>
-      <entry name="bottom" value="2"
-       summary="the bottom edge of the anchor rectangle"/>
-      <entry name="left" value="4"
-       summary="the left edge of the anchor rectangle"/>
-      <entry name="right" value="8"
-       summary="the right edge of the anchor rectangle"/>
-    </enum>
 
     <request name="set_anchor">
       <description summary="configures the anchor point of the surface">
@@ -143,6 +119,30 @@
       <arg name="horizontal" type="uint"/>
       <arg name="vertical" type="uint"/>
     </request>
+
+    <enum name="input_devices">
+      <description summary="types of input devices">
+        These flags are a bitfield and are used by set_interactive to specify
+        what sorts of input the surface should interact with.
+      </description>
+      <entry name="none" value="0"/>
+      <entry name="pointer" value="1"/>
+      <entry name="keyboard" value="2"/>
+      <entry name="touch" value="4"/>
+    </enum>
+
+    <enum name="anchor" bitfield="true">
+      <entry name="none" value="0"
+       summary="the center of the anchor rectangle"/>
+      <entry name="top" value="1"
+       summary="the top edge of the anchor rectangle"/>
+      <entry name="bottom" value="2"
+       summary="the bottom edge of the anchor rectangle"/>
+      <entry name="left" value="4"
+       summary="the left edge of the anchor rectangle"/>
+      <entry name="right" value="8"
+       summary="the right edge of the anchor rectangle"/>
+    </enum>
   </interface>
 
 </protocol>
