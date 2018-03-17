@@ -261,31 +261,6 @@
       <arg name="events" type="uint" enum="wl_seat::capability"/>
     </request>
 
-    <request name="set_passthrough">
-      <description summary="set input events to pass through">
-        Requests that the seat pass through input events for the specified
-        input devices to other clients. It is a protocol error to call
-        set_passthrough with any events that were not requested via set_events.
-
-        By default, the seat will report input events exclusively to the
-        top-most layer surface that requested events of that type. However, by
-        specifying a passthrough bitfield, the layer surface can receive these
-        events without preventing other clients from receiving them normally.
-
-        Even with positional events (pointer and touch) passed through, layer
-        surfaces must be the top-most interactive surface to receive them.
-        However, these events will also be passed to surfaces beneath the layer
-        surface as if the layer surface was not present.
-
-        Keyboard events will be passed to other surfaces with normal focus
-        semantics. Events will be sent both to the focused client and the layer
-        surface.
-
-        Passthrough is double-buffered, see wl_surface.commit.
-      </description>
-      <arg name="events" type="uint" enum="wl_seat::capability"/>
-    </request>
-
     <request name="destroy" type="destructor">
       <description summary="destroy the layer_input">
         This request destroys the layer input.
