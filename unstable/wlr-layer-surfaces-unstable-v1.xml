@@ -228,7 +228,7 @@
   </interface>
 
   <interface name="zwlr_layer_input_v1" version="1">
-    <description>
+    <description summary="layer surface input configuration object">
       Clients can use this interface to specify input semantics for a layer
       surface on a given seat. By default, layer surfaces are considered
       non-interactive by seats, and will not participate in their focus
@@ -258,7 +258,7 @@
 
         Events is double-buffered, see wl_surface.commit.
       </description>
-      <arg name="events" type="uint" enum="wl_seat::capability"/>
+      <arg name="events" type="uint" enum="input_device"/>
     </request>
 
     <request name="destroy" type="destructor">
@@ -266,5 +266,12 @@
         This request destroys the layer input.
       </description>
     </request>
+
+    <enum name="input_device" bitfield="true">
+      <entry name="pointer" value="1" summary="wl_pointer devices"/>
+      <entry name="keyboard" value="2" summary="wl_keyboard devices"/>
+      <entry name="touch" value="4" summary="wl_touch devices"/>
+      <entry name="tablet" value="8" summary="zwp_tablet and zwp_tablet_tool devices"/>
+    </enum>
   </interface>
 </protocol>
