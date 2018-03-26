@@ -86,10 +86,26 @@
       are designed to be rendered as a layer of a stacked desktop-like
       environment.
 
-      Layer surface state (anchor, exclusive zone, margin, interactivity) is
-      double-buffered, and will be applied at the time wl_surface.commit of the
-      corresponding wl_surface is called.
+      Layer surface state (size, anchor, exclusive zone, margin, interactivity)
+      is double-buffered, and will be applied at the time wl_surface.commit of
+      the corresponding wl_surface is called.
     </description>
+
+    <request name="set_size">
+      <description summary="sets the size of the surface">
+        Sets the size of the surface in pixels. The compositor will display the
+        surface centered with respect to its anchors.
+
+        If you pass 0 for either value, the compositor will assign it and
+        inform you of the assignment in the configure event. You must set your
+        anchor to opposite edges in the dimensions you omit; not doing so is a
+        protocol error. Both values are 0 by default.
+
+        Size is double-buffered, see wl_surface.commit.
+      </description>
+      <arg name="width" type="uint"/>
+      <arg name="height" type="uint"/>
+    </request>
 
     <request name="set_anchor">
       <description summary="configures the anchor point of the surface">
@@ -111,9 +127,24 @@
         implementation-dependent - do not assume that this region will not
         actually be occluded.
 
-        This value is only meaningful if the surface is anchored to an edge,
-        rather than a corner. The zone is the number of pixels from the edge
-        that are considered exclusive.
+        A positive value is only meaningful if the surface is anchored to an
+        edge, rather than a corner. The zone is the number of pixels from the
+        edge that are considered exclusive.
+
+        Surfaces that do not wish to have an exclusive zone may instead specify
+        how they should interact with surfaces that do. If set to zero, the
+        surface indicates that it would like to be moved to avoid occluding
+        surfaces with a positive excluzive zone. If set to -1, the surface
+        indicates that it would not like to be moved to accomodate for other
+        surfaces, and the compositor should extend it all the way to the edges
+        it is anchored to.
+
+        For example, a panel might set its exclusive zone to 10 pixels, so that
+        maximized shell surfaces are not shown on top of it. A notification
+        might set its exclusive zone to zero, so that it is moved to avoid
+        occluding the panel, but shell surfaces are shown underneath it. A
+        wallpaper or lock screen might set their exclusive zone to -1, so that
+        they stretch below or over the panel.
 
         Exclusive zone is double-buffered, see wl_surface.commit.
       </description>
@@ -221,11 +252,20 @@
       <arg name="height" type="uint"/>
     </event>
 
+    <event name="closed">
+      <description summary="surface should be closed">
+    The closed event is sent by the compositor when the surface will no
+    longer be shown. The output may have been destroyed or the user may have
+    asked for it to be removed. Further changes to the surface will be ignored.
+    The client should destroy the resource after receiving this event, and
+    create a new surface if they so choose.
+      </description>
+    </event>
+
     <enum name="error">
-      <entry name="invalid_input_device" value="0" summary="input device bitfield is invalid"/>
-      <entry name="invalid_anchor" value="1" summary="anchor bitfield is invalid"/>
-      <entry name="invalid_surface_state" value="2"
-	     summary="the client provided an invalid surface state"/>
+      <entry name="invalid_surface_state" value="0" summary="provided surface state is invalid"/>
+      <entry name="invalid_size" value="1" summary="size is invalid"/>
+      <entry name="invalid_anchor" value="2" summary="anchor bitfield is invalid"/>
     </enum>
 
     <enum name="anchor" bitfield="true">
