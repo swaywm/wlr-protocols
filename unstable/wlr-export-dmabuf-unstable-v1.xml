@@ -24,229 +24,264 @@
     DEALINGS IN THE SOFTWARE.
   </copyright>
 
-  <description summary="a protocol for low overhead screen content capturing">
-    An interface to capture surfaces in an efficient way.
-    Overall usage:
+  <interface name="zwlr_export_dmabuf_manager_v1" version="1">
+    <description summary="manages available buffers for capture">
+      Clients who bind to this interface will receive events advertising a list
+      of dmabuf sources available for export. This list may change over time, as
+      new outputs and surfaces become available or are removed on the
+      compositor.
 
-    1.) client registers with zwlr_screencontent_manager_v1
-    2.) server sends client info about surfaces via "receive_surface_info"
-    3.) client subscribes to capture a surface via the "capture" requests
-    4.) server sends client events via the "zwlr_screencontent_frame" interface
-    5.) client finishes and informs server via the "frame_destroy" event
-    6.) client optionally resubscribes via repeating steps 3.) through 5.)
-  </description>
+      There is no guarantee that the compositor will send to the client all
+      surfaces and outputs that it knows of. The compositor may ask the user
+      which sources they wish to make available to the client, and the list of
+      authorized sources may change at any time.
+    </description>
+
+    <event name="new_surface">
+      <description summary="a new surface is available for capture">
+    This event is sent when a new wl_surface is available for dmabuf export.
+
+    The source_id can be passed to the capture request to initiate a capture and
+    is guaranteed to be unique among all source_ids emitted on this
+    zwlr_export_dmabuf_manager_v1, including those from events other than
+    new_surface.
+
+    If the new surface is a toplevel, the name is non-null and will be set to a
+    user-friendly window title (for example, via xdg_toplevel::set_title) and
+    the parent argument will not be meaningful.
+
+    If the surface is the child of a toplevel (such as an xdg_popup), the name
+    will be null and the parent argument set to the ID of a previous
+    new_surface event. The parent ID may also be set to the source ID of an
+    output, for example, if the output is using a hardware cursor.
+
+    If a child surface is reparented, the source_removed event is sent and
+    new_surface raised with the new relationship indicated.
+      </description>
+      <arg name="source_id" type="uint"
+         summary="a unique dmabuf source identifier"/>
+      <arg name="name" type="string" allow-null="true"
+        summary="user friendly surface name"/>
+      <arg name="parent" type="uint"
+        summary="source_id of the parent surface"/>
+    </event>
+
+    <event name="new_output">
+      <description summary="a new output is available for capture">
+    This event is sent when a new wl_output is available for dmabuf export.
+
+    The source_id can be passed to the capture request to initiate a capture and
+    is guaranteed to be unique among all source_ids emitted on this
+    zwlr_export_dmabuf_manager_v1, including those from events other than
+    new_output.
+
+    If the client binds to the same wl_output more than once, and that output is
+    available for capture, this event is sent once for each resource.
+      </description>
+      <arg name="source_id" type="uint"
+         summary="a unique dmabuf source identifier"/>
+      <arg name="output" type="object" interface="wl_output"
+        summary="the wl_output being offered"/>
+    </event>
+
+    <event name="source_removed">
+      <description summary="indicates a source is no longer available">
+    This event is sent when a source previously announced becomes unavailable.
+    The client may still create a frame resource for this source, but it will
+    not receive any frames from it (instead, the cancel event will be immediately
+    sent).
+      </description>
+      <arg name="source_id" type="uint"
+        summary="the source_id of the source which has been removed"/>
+    </event>
+
+    <request name="capture">
+      <description summary="create a frame resource for a source">
+    Creates a frame resource for the given source.
+
+    See the documentation of zwlr_export_dmabuf_frame_v1 for more details about
+    the interface and its usage.
+      </description>
+      <arg name="frame" type="new_id"
+           interface="zwlr_export_dmabuf_frame_v1"/>
+      <arg name="source_id" type="uint"
+           summary="the source_id to receive frames for"/>
+    </request>
+
+    <!-- TODO: Define this protocol error -->
+    <request name="destroy" type="destructor">
+      <description summary="destroy the manager">
+    Destroys this zwlr_export_dmabuf_manager_v1 object.
+
+    Destroying a bound zwlr_export_dmabuf_manager_v1 object while there are
+    still zwlr_export_dmabuf_frame_v1 objects alive is illegal and will result
+    in a protocol error.
+      </description>
+    </request>
+  </interface>
 
   <interface name="zwlr_export_dmabuf_frame_v1" version="1">
-    <description summary="a frame ready for readout">
-      This object represents a frame which is ready to have its resources
-      fetched and used.
+    <description summary="exports dmabuf frames for readout">
+  This interface sends the client events that describe new frames available from
+  a source obtained via zwlr_export_dmabuf_manager_v1.
 
-      The receive callback shall be called first, followed by the "object"
-      callback once per dmabuf object or the "layer" callback, once per dmabuf
-      layer. The "plane" callback shall only be called after the "layer"
-      callback corresponding to the layer the plane belongs to has been called
-      Finally, the "ready" event is called to indicate that all the data has
-      been made available for readout, as well as the time at which presentation
-      happened at. The ownership of the frame is passed to the client, who's
-      responsible for destroying it via the "destroy" event once finished.
-      The data the API describes has been based off of what
-      VASurfaceAttribExternalBuffers contains.
-      All frames are read-only and may not be written into or altered.
+  This interface exposes underlying details of VASurfaceAttribExternalBuffers,
+  part of the Linux DRM interface. In many respects, this interface is the
+  inverse of zwp_linux_buffer_params_v1. Unlike zwp_linux_buffer_params_v1, this
+  also includes some additional information which, in the case of
+  zwp_linux_buffer_params_v1, is normally configured through e.g. wl_surface.
+
+  The compositor will send events detailing the size, transform, pixel format,
+  file descriptors, and so on, which can be used to read the next frame. When
+  the frame is ready, the "ready" event is sent and includes details about the
+  presentation time of that frame. When the client is done reading the frame,
+  they must send the "finish" request.
+
+  All frames are read-only and may not be written into or altered.
     </description>
 
     <enum name="flags">
-      <description summary="frame flags">
-        Special flags that must be respected by the client.
-        Transient frames indicate short lifetime frames (such as swapchain
-        images from external clients). Clients are advised to copy them and do
-        all processing outside of the "ready" event.
-      </description>
-      <entry name="transient" value="0x1" since="1"/>
+      <entry name="transient" value="0x1"
+        summary="a short-lived frame the client should copy and process later"/>
     </enum>
 
     <event name="frame">
-      <description summary="main callback">
-        Main callback supplying the client with information about the frame,
-        as well as an object to serve as context for destruction. Always called
-        first before any other events.
+      <description summary="sends details of the next frame">
+    The frame event is sent to configure various details about the next frame.
+    This event is always sent before the first ready event, but will not be
+    re-sent if the details do not change between frames.
 
-        The "transform" argument describes the orientation needed to be applied
-        to correctly orient the buffer. For example, a buffer rotated by 90
-        degrees will have a value of "3" here, corresponding to the need to
-        apply a 270 degree transpose to correctly present the buffer.
+    For details on the scale factor argument, see wl_surface::set_buffer_scale
+    and wl_output::scale.
       </description>
       <arg name="width" type="uint"
-           summary="frame width, scaling factor included"/>
+           summary="width in pixels of the next frame"/>
       <arg name="height" type="uint"
-           summary="frame height, scaling factor included"/>
+           summary="height in pixels of the next frame"/>
       <arg name="scale" type="uint"
-           summary="current scaling factor of the client"/>
+           summary="scale factor of the next frame"/>
       <arg name="transform" type="uint"
-           summary="transform needed to correct the orientation, has the same
-                    values as wl_output::transform"/>
+           summary="see wl_output.transform"/>
+      <arg name="format" type="uint" summary="DRM_FORMAT code"/>
       <arg name="buffer_flags" type="uint"
-           summary="flags which indicate properties (invert, interlacing),
-                    has the same values as zwp_linux_buffer_params_v1:flags"/>
+           summary="see zwp_linux_buffer_params_v1:flags"/>
       <arg name="flags" type="uint" enum="flags"
-           summary="indicates special frame features"/>
-      <arg name="mod_high" type="uint"
-           summary="drm format modifier, high"/>
-      <arg name="mod_low" type="uint"
-           summary="drm format modifier, low"/>
+           summary="see enum flags"/>
       <arg name="num_objects" type="uint"
            summary="indicates how many objects (FDs) the frame has (max 4)"/>
       <arg name="num_layers" type="uint"
            summary="indicates how many layers the frame has (max 4)"/>
     </event>
-    <event name="object">
-      <description summary="object receiving callback">
-        Callback which serves to supply the client with the file descriptors
-        containing the data for each object.
+
+    <event name="plane">
+      <description summary="adds a plane to the next frame">
+    Adds a new plane to the next frame, providing format information and a file
+    descriptor it may be read from.
+
+    The compositor must use consecutive plane indices from zero to the number of
+    planes used by the drm_fourcc format code. All planes required by the format
+    must be given exactly once, but can be given in any order. Each plane index
+    can be set only once.
+
+    Single-planar formats only require one dmabuf, however multi-planar formats
+    may require more than one dmabuf. For all formats, data_source is sent once
+    per plane (even if the underlying dmabuf fd is identical).
+
+    The 64-bit unsigned value combined from modifier_hi and modifier_lo is the
+    dmabuf layout modifier. DRM AddFB2 ioctl calls this the fb modifier, which
+    is defined in drm_mode.h of Linux UAPI. This is an opaque token. Drivers
+    use this token to express tiling, compression, etc. driver-specific
+    modifications to the base format defined by the DRM fourcc code.
+
+    This event is always sent before the first ready event, but will not be
+    re-sent if the details do not change between frames.
       </description>
       <arg name="index" type="uint"
            summary="index of the current object"/>
       <arg name="fd" type="fd"
            summary="fd of the current object"/>
-      <arg name="size" type="uint"
-           summary="size in bytes for the current object"/>
+      <arg name="offset" type="uint" summary="offset in bytes"/>
+      <arg name="stride" type="uint" summary="stride in bytes"/>
+      <arg name="modifier_hi" type="uint"
+           summary="drm format modifier, high"/>
+      <arg name="modifier_lo" type="uint"
+           summary="drm format modifier, low"/>
     </event>
-    <event name="layer">
-      <description summary="layer receiving callback">
-        Callback which serves to supply the client with information on what's
-        contained in each file descriptor and how its laid out.
-        Will be called after the main receive event, once per layer.
+
+    <event name="position">
+      <description summary="gives the position of child surfaces">
+    For frame resources created from surfaces that are children of another
+    source, this event is sent to indicate the position of the child surface in
+    surface-local coordinates relative to its parent.
+
+    This event is always sent before the first ready event, but will not be
+    re-sent if the details do not change between frames. This event is never
+    sent for sources which do not have parents.
       </description>
-      <arg name="index" type="uint"
-           summary="index of the current plane"/>
-      <arg name="format" type="uint"
-           summary="format of the layer (DRM_FORMAT_*)"/>
-      <arg name="num_planes" type="uint"
-           summary="number of planes in the current layer (max 4)"/>
+      <arg name="x" type="int" summary="x coordinate in the parent surface"/>
+      <arg name="y" type="int" summary="y coordinate in the parent surface"/>
     </event>
-    <event name="plane">
-      <description summary="plane info receiving callback">
-        Callback which supplies the client with plane information for each
-        layer.
-      </description>
-      <arg name="index" type="uint"
-           summary="index of the current plane"/>
-      <arg name="layer_index" type="uint"
-           summary="index of the current layer"/>
-      <arg name="object_index" type="uint"
-           summary="index of the object the plane applies to"/>
-      <arg name="offset" type="uint"
-           summary="starting point for the data in the object's fd"/>
-      <arg name="stride" type="uint"
-           summary="line size in bytes"/>
-    </event>
+
     <event name="ready">
       <description summary="indicates frame is available for reading">
-        Called as soon as the frame is presented, indicating it is available
-        for reading.
-        The timestamp is expressed as tv_sec_hi, tv_sec_lo, tv_nsec triples,
-        each component being an unsigned 32-bit value. Whole seconds are in
-        tv_sec which is a 64-bit value combined from tv_sec_hi and tv_sec_lo,
-        and the additional fractional part in tv_nsec as nanoseconds. Hence,
-        for valid timestamps tv_nsec must be in [0, 999999999].
-        The seconds part may have an arbitrary offset at start.
+    The ready event is sent when a frame is presented and is available for
+    reading.
+
+    The timestamp is expressed as tv_sec_hi, tv_sec_lo, tv_nsec triples, each
+    component being an unsigned 32-bit value. Whole seconds are in tv_sec which
+    is a 64-bit value combined from tv_sec_hi and tv_sec_lo, and the additional
+    fractional part in tv_nsec as nanoseconds. Hence, for valid timestamps
+    tv_nsec must be in [0, 999999999].
+
+    Timestamps are accurate relative to each other, but have an undefined epoch.
       </description>
       <arg name="tv_sec_hi" type="uint"
-           summary="high 32 bits of the seconds part of the timestamp"/>
+        summary="high 32 bits of the seconds part of the timestamp"/>
       <arg name="tv_sec_lo" type="uint"
-           summary="low 32 bits of the seconds part of the timestamp"/>
+        summary="low 32 bits of the seconds part of the timestamp"/>
       <arg name="tv_nsec" type="uint"
-           summary="nanoseconds part of the timestamp"/>
+        summary="nanoseconds part of the timestamp"/>
     </event>
 
-    <enum name="abort_reason">
-      <description summary="abort reason">
-        Indicates reason for aborting the frame.
-      </description>
-      <entry name="invalid_source" value="0" since="1"
-             summary="invalid source, will not produce any (more) frames"/>
-      <entry name="resizing" value="1" since="1"
-             summary="source started being resized, this frame must be dropped,
-                      but source is still able to be captured"/>
-      <entry name="security" value="2" since="1"
-             summary="this frame must be dropped as sensitive data was present,
-                      however future capture may still succeed"/>
+    <enum name="cancel_reason">
+      <entry name="invalid_source" value="0"
+        summary="the frame source is or has become invalid"/>
+      <entry name="invalid_frame" value="1"
+        summary="this frame is no longer valid"/>
     </enum>
 
-    <event name="abort">
+    <event name="cancel">
       <description summary="indicates the frame is no longer valid">
-        If the frame is no longer valid after the "frame" event has been called,
-        this callback will be used to inform the client to scrap the frame.
-        Source is still valid for as long as the subscription function does not
-        return NULL.
-        This may get called if for instance the surface is in the process of
-        resizing.
+    The compositor will send this event to cancel the current frame.
+
+    The reason is set to invalid_frame when only the current frame is invalid.
+    This would normally only happen if a client has attached a buffer (and thus
+    the compositor passes along its information) but for some reason the frame
+    was not rendered.
+
+    The reason is set to invalid_source if the underlying source has become
+    invalid. In this case, no frames will be sent to this resource after the
+    cancel event and the client should destroy the resource.
       </description>
-      <arg name="reason" type="uint" enum="abort_reason"
-           summary="indicates a reason for aborting this frame capture"/>
+      <arg name="reason" type="uint" enum="cancel_reason"
+        summary="indicates the reason this frame was cancelled"/>
     </event>
 
+    <!-- TODO: Add this protocol error -->
+    <request name="finish">
+      <description summary="the client has finished reading">
+    The client should send this request when it finishes reading the frame. It
+    is a protocol error to send finish before the ready event, or to send it
+    twice for a single frame.
+      </description>
+    </request>
+
     <request name="destroy" type="destructor">
-      <description summary="delete this object, used or not">
-        Unreferences the frame, allowing it to be reused. Must be called as soon
-        as its no longer used.
+      <description summary="releases the frame resource">
+    Informs the server that the client will no longer be using this protocol
+    object.
       </description>
     </request>
   </interface>
 
-  <interface name="zwlr_export_dmabuf_manager_v1" version="1">
-    <description summary="manager to inform clients and begin capturing">
-      This object is a manager which informs clients about capturable windows
-      and is able to create callbacks from which to begin to receive content
-      from. The "title" argument in the "surface_info" event shall be used
-      to provide a user-readable identifier such as a window title or
-      program name.
-    </description>
-
-    <event name="surface_info">
-      <description summary="get valid surfaces for capture">
-        This will be called whenever a surface that's able to be captured
-        appears.
-      </description>
-      <arg name="title" type="string"
-           summary="window title or an identifier"/>
-      <arg name="id" type="uint"
-           summary="an identifier to create a context with"/>
-    </event>
-    <event name="surface_unavailable">
-      <description summary="notifies of a surface being unavailable to capture">
-        Called if a surface becomes unavailable to capture, for example if has
-        been closed.
-      </description>
-      <arg name="id" type="uint"
-           summary="an identifier of the surface"/>
-    </event>
-
-    <request name="capture_client">
-      <description summary="subscribe to start capturing">
-        Request to start capturing from a surface with a given id.
-      </description>
-      <arg name="frame" type="new_id"
-           interface="zwlr_export_dmabuf_frame_v1"/>
-      <arg name="overlay_cursor" type="int"
-           summary="include custom client hardware cursor on top of the frame"/>
-      <arg name="id" type="uint"
-           summary="an identifier to start capturing from"/>
-    </request>
-    <request name="capture_output">
-      <description summary="subscribe to start capturing">
-        Request to start capturing from an entire wl_output.
-      </description>
-      <arg name="frame" type="new_id"
-           interface="zwlr_export_dmabuf_frame_v1"/>
-      <arg name="overlay_cursor" type="int"
-           summary="include custom client hardware cursor on top of the frame"/>
-      <arg name="output" type="object" interface="wl_output"/>
-    </request>
-    <request name="destroy" type="destructor">
-      <description summary="destroy the manager">
-        All objects created by the manager will still remain valid, until their
-        appropriate destroy request has been called.
-      </description>
-    </request>
-  </interface>
 </protocol>
