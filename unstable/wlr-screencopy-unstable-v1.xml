@@ -30,32 +30,16 @@
 
   <interface name="zwlr_screencopy_manager_v1" version="1">
     <description summary="manager to inform clients and begin capturing">
-      This object is a manager which informs clients about capturable sources
-      and is able to create callbacks from which to begin to receive content
-      from.
+      This object is a manager which offers requests to start capturing from a
+      source.
     </description>
 
-    <event name="source_output">
-      <description summary="advertise an output source">
-        Advertise an output source available for capture.
-      </description>
-      <arg name="id" type="uint" summary="the source identifier"/>
-      <arg name="output" type="object" interface="wl_output"/>
-    </event>
-
-    <event name="source_remove">
-      <description summary="remove a source">
-        This event is sent whenever a source isn't available anymore.
-      </description>
-      <arg name="id" type="uint" summary="the source identifier"/>
-    </event>
-
-    <request name="capture">
+    <request name="capture_output">
       <description summary="start capturing">
-        Request to start capturing from a source with a given identifier.
+        Request to start capturing from the given output.
       </description>
       <arg name="frame" type="new_id" interface="zwlr_screencopy_frame_v1"/>
-      <arg name="id" type="uint" summary="the source identifier"/>
+      <arg name="output" type="object" interface="wl_output"/>
     </request>
 
     <request name="destroy" type="destructor">
@@ -72,7 +56,7 @@
       fetched and used.
     </description>
 
-    <enum name="flags" bitfield="1">
+    <enum name="flags" bitfield="true">
       <entry name="y_invert" value="1" summary="contents are y-inverted"/>
     </enum>
 
