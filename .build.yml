@@ -2,8 +2,8 @@ image: archlinux
 packages:
   - wayland
 sources:
-  - https://git.sr.ht/~sircmpwn/sway-protocols
+  - https://github.com/swaywm/wlr-protocols
 tasks:
   - protocols: |
-      cd sway-protocols
+      cd wlr-protocols
       ./check.sh
