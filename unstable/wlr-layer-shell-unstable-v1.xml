@@ -115,7 +115,7 @@
     <request name="set_anchor">
       <description summary="configures the anchor point of the surface">
         Requests that the compositor anchor the surface to the specified edges
-        and corners. If two orthoginal edges are specified (e.g. 'top' and
+        and corners. If two orthogonal edges are specified (e.g. 'top' and
         'left'), then the anchor point will be the intersection of the edges
         (e.g. the top left corner of the output); otherwise the anchor point
         will be centered on that edge, or in the center if none is specified.
@@ -134,13 +134,13 @@
 
         A positive value is only meaningful if the surface is anchored to an
         edge, rather than a corner. The zone is the number of surface-local
-        coordinates from the edge that are considered exclusive.
+        coordinates from the edge that is considered exclusive.
 
         Surfaces that do not wish to have an exclusive zone may instead specify
         how they should interact with surfaces that do. If set to zero, the
         surface indicates that it would like to be moved to avoid occluding
-        surfaces with a positive excluzive zone. If set to -1, the surface
-        indicates that it would not like to be moved to accomodate for other
+        surfaces with a positive exclusive zone. If set to -1, the surface
+        indicates that it would not like to be moved to accommodate for other
         surfaces, and the compositor should extend it all the way to the edges
         it is anchored to.
 
