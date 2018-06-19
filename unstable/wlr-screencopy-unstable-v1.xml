@@ -71,9 +71,6 @@
       </description>
       <arg name="width" type="uint" summary="buffer width"/>
       <arg name="height" type="uint" summary="buffer height"/>
-      <arg name="scale" type="uint" summary="scaling factor"/>
-      <arg name="transform" type="uint" summary="transformation, has the same
-        values as wl_output::transform"/>
       <arg name="flags" type="uint" enum="flags" summary="buffer flags"/>
       <arg name="format" type="uint" summary="preferred DRM_FORMAT"/>
       <arg name="stride" type="uint" summary="preferred stride"/>
