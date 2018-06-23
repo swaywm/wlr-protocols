@@ -90,7 +90,7 @@
 
       When created, a "buffer" event will be sent. The client will then be able
       to send a "copy" request. If the capture is successful, the compositor
-      will finally a "ready" event.
+      will send a "flags" followed by a "ready" event.
 
       If the capture failed, the "failed" event is sent. This can happen anytime
       before the "ready" event.
@@ -105,8 +105,8 @@
         as soon as the frame is created.
 
         The client should then create a buffer with the provided width and
-        height, and send a copy request. It can optionally create a buffer with
-        the preferred format and stride.
+        height, and send a "copy" request. It can optionally create a buffer
+        with the preferred format and stride.
       </description>
       <arg name="width" type="uint" summary="buffer width"/>
       <arg name="height" type="uint" summary="buffer height"/>
@@ -120,8 +120,8 @@
         correct size, see zwlr_screencopy_frame_v1.buffer. The buffer needs to
         have a supported format.
 
-        If the frame is successfully copied, a ready event is sent. Otherwise,
-        an abort event is sent.
+        If the frame is successfully copied, a "flags" and a "ready" events are
+        sent. Otherwise, a "failed" event is sent.
       </description>
       <arg name="buffer" type="object" interface="wl_buffer"/>
     </request>
