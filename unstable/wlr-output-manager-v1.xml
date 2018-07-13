@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="wlr_output_manager_v1">
+  <copyright>
+    Copyright © 2018 Vincent Vanlaer
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+
+  <description summary="Protocol to describe and configure output devices">
+    Warning! The protocol described in this file is experimental and
+    backward incompatible changes may be made. Backward compatible changes
+    may be added together with the corresponding interface version bump.
+    Backward incompatible changes are done by bumping the version number in
+    the protocol and interface names and resetting the interface version.
+    Once the protocol is to be declared stable, the 'z' prefix and the
+    version number in the protocol and interface names are removed and the
+    interface version number is reset.
+  </description>
+
+  <interface name="zwlr_output_device_v1" version="1">
+    <description summary="describes an output device">
+      An output_device describes a display device available to the compositor.
+      It is similar to wl_output, but focuses on output configuration management.
+
+      A client can query all global output_device objects to enlist all
+      available display devices, even those that are currently not
+      represented by the compositor as a wl_output.
+
+      A client can send configuration changes to the server through the
+      output_configuration interface. The server will apply those changes
+      to the output devices and will signal the changes accordingly to the
+      output device interface.
+
+      The information obtained from the output_device should not be used
+      to render to those outputs. Instead, one should use the xdg_shell
+      interfaces or the xdg_output protocol.
+
+      This object is published as global during start up for every available
+      display devices, or when one later becomes available, for example by
+      being hotplugged via a physical connector.
+    </description>
+
+    <event name="supported_mode">
+      <description summary="advertise supported output modes">
+        The supported_mode event describes an available mode for the output.
+        These modes are advertised by the output device as being supported and
+        should be preferred over any other, custom, mode.
+
+        When the client binds to the output_device object, the server sends this
+        event once for every supported mode.
+        
+        Not all output devices need to have supported modes. For example, an
+        RDP-style output might have no advertised modes.
+
+        The size described by a mode represents the size of the underlying buffer.
+        It does not need to be the same as the output size in the compositor space. 
+      </description>
+      <arg name="width" type="int" summary="width of the output buffer"/>
+      <arg name="height" type="int" summary="height of the output buffer"/>
+      <arg name="refresh" type="int" summary="vertical refresh rate in mHz"/>
+    </event>
+    
+    <event name="active_mode">
+      <description summary="active mode of the output">
+        The active_mode event describes the mode that the output device is
+        currently set to.
+
+        The active mode does not need to be one of the modes advertised by
+        the supported_mode event.
+
+        This event is sent after the client binds to the output_device and
+        whenever the mode of the output changes.
+      </description>
+      <arg name="width" type="int" summary="width of the output buffer"/>
+      <arg name="height" type="int" summary="height of the output buffer"/>
+      <arg name="refresh" type="int" summary="vertical refresh rate in mHz"/>
+    </event>
+    
+    <event name="transformation">
+      <description summary="transformations applied to framebuffer">
+        This event describes the transformations that are applied to the
+        framebuffer before it is displayed.
+
+        This event is sent after the client binds to the output_device and
+        whenever the mode of the output changes.
+      </description>
+      <arg name="transformation" type="int" enum="wl_output.transform"/>
+    </event>
+    
+    <event name="size">
+      <description summary="size of the output in the compositor space">
+        The size event describes the size of the output in the global
+        compositor space.
+
+        It is comparable to the zxdg_output_v1.logical_size event, but is not
+        the same in all circumstances. The zxdg_output_v1.logical_size event
+        will not be the same if the compositor does not scale the surface
+        buffers.
+
+        Combined with the current_mode and transformation event, this event
+        effectively describes the scale applied to the output's buffer
+        before it is displayed.
+
+        This event is sent after the client binds to the output_device object
+        and whenever the size of the output device in the global compositor
+        space changes.
+      </description>
+      <arg name="width" type="int"
+        summary="width in global compositor space"/>
+      <arg name="height" type="int"
+        summary="height in global compositor space"/>
+    </event>
+
+    <event name="position">
+      <description summary="position of the output in the compositor space">
+        This events describes the position of the output_device within the
+        global compositor space.
+
+        If the compositor implements xdg_output and this output is enabled,
+        the zxdg_output_v1.logical_position must report the same position. 
+
+        This event is sent after the client binds to the output_device
+        and whenever the position of the output changes in the compositor space.
+      </description>
+      <arg name="x" type="int"
+        summary="x position within the global compositor space"/>
+      <arg name="y" type="int"
+        summary="y position within the global compositor space"/>
+    </event>
+    
+    <enum name="enablement">
+      <description summary="describes enabled state">
+        Describes whether a device is enabled, i.e. device is used to
+        display content by the compositor. This wraps a boolean around
+        an int to avoid a boolean trap.
+      </description>
+      <entry name="disabled" value="0"/>
+      <entry name="enabled" value="1"/>
+    </enum>
+
+    <event name="enabled">
+      <description summary="output is enabled or disabled">
+        This event describes whether the output is actively displaying a part
+        of the global compositor space.
+
+        If an output_device is enabled, the output must be represented by
+        a wl_output.
+        
+        This event is sent after the client binds to the output_device
+        and whenever the output device is enabled or disabled.
+      </description>
+      <arg name="enabled" type="int" summary="output enabled state"/>
+    </event>
+
+    <event name="name">
+      <description summary="name of this output">
+        Many compositors will assign names to their outputs, show them to the
+        user, allow them to be configured by name, etc. The client may wish to
+        know this name as well to offer the user similar behaviors.
+
+        The naming convention is compositor defined, but limited to
+        alphanumeric characters and dashes (-). Each name is unique among all
+        wl_output globals, but if a wl_output global is destroyed the same name
+        may be reused later. The names will also remain consistent across
+        sessions with the same hardware and software configuration.
+
+        Examples of names include 'HDMI-A-1', 'WL-1', 'X11-1', etc. However, do
+        not assume that the name is a reflection of an underlying DRM
+        connector, X11 connection, etc.
+
+        This event is only sent once per zwlr_output_device_v1, and the
+        name does not change over the lifetime of the zwlr_output_device_v1.
+      </description>
+      <arg name="name" type="string" summary="output name"/>
+    </event>
+
+    <event name="description">
+      <description summary="human-readable description of this output">
+        Many compositors can produce human-readable descriptions of their
+        outputs.  The client may wish to know this description as well, to
+        communicate the user for various purposes.
+
+        The description is a UTF-8 string with no convention defined for its
+        contents. Examples might include 'Foocorp 11" Display' or 'Virtual X11
+        output via :1'.
+
+        This event is only sent once per zwlr_output_device_v1, and the
+        name does not change over the lifetime of the zwlr_output_device_v1.
+      </description>
+      <arg name="description" type="string" summary="output description"/>
+    </event>
+
+    <event name="done">
+      <description summary="sent all information about output">
+        This event is sent after all other properties have been
+        sent after binding to the output object and after any
+        other property changes done after that. This allows
+        changes to the output properties to be seen as
+        atomic, even if they happen via multiple events.
+      </description>
+    </event>
+
+    <event name="disconnected">
+      <description summary="">
+        The disconnected event indicates that the output device is no longer
+        connected to the compositor. The server will no longer send events to
+        this object.
+
+        If the client tries to configure any of the output's properties, it will
+        fail.
+
+        The client should destroy the object after it receives this event.
+      </description>
+    </event>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the output device object">
+        Using this request a client can tell the server that it is not going to
+        use the output device object anymore.
+      </description>
+    </request>
+
+  </interface>
+
+  <interface name="zwlr_output_manager_v1" version="1">
+    <description summary="manage output device properties">
+      Allows the client to change the properties of an output device. The
+      client binds the output manager globally, then creates a configuration
+      object.
+    </description>
+    <request name="create_configuration">
+      <description summary="create a new output configuration object">
+        Create a new output configuration object.
+      </description>
+      <arg name="id" type="new_id" interface="zwlr_output_device_v1"/>
+    </request>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the output manager">
+        Using this request a client can tell the server that it is not going
+        to use the manager object anymore. Any objects created by the manager
+        will remain valid, until their appropriate destroy request has been
+        called.
+      </description>
+    </request>
+  </interface>
+
+  <interface name="zwlr_output_configuration_v1" version="1">
+    <description summary="configure output device properties">
+      
+    </description>
+    <request name="set_mode">
+      <description summary="modeset the output device">
+        Set the current mode of an output device.
+      </description>
+      <arg name="width" type="int" summary="width of the output buffer"/>
+      <arg name="height" type="int" summary="height of the output buffer"/>
+      <arg name="refresh" type="int" summary="vertical refresh rate in mHz"/>
+      <arg name="output_device" type="object" interface="zwlr_output_device_v1"
+        summary="the output device to be configured"/>
+    </request>
+
+    <request name="set_transformation">
+      <description summary="set the buffer transformation">
+        Set the buffer transformation of an output device.
+      </description>
+      <arg name="transformation" type="int" enum="wl_output.transform" 
+        summary="transformation to apply"/>
+      <arg name="output_device" type="object" interface="zwlr_output_device_v1"
+        summary="the output device to be configured"/>
+    </request>
+
+    <request name="set_position">
+      <description summary="set the position of the output device">
+        Set the buffer position of an output device in the global compositor
+        space.
+      </description>
+      <arg name="x" type="int"
+        summary="x position within the global compositor space"/>
+      <arg name="y" type="int"
+        summary="y position within the global compositor space"/>
+      <arg name="output_device" type="object" interface="zwlr_output_device_v1"
+        summary="the output device to be configured"/>
+    </request>
+
+    <request name="set_enabled">
+      <description summary="enable or disable the output">
+        Enable or disable an output device.
+      </description>
+      <arg name="enabled" type="int" summary="output enabled state"/>
+      <arg name="output_device" type="object" interface="zwlr_output_device_v1"
+        summary="the output device to be configured"/>
+    </request>
+
+    <request name="apply">
+      <description summary="apply pending changes">
+        Apply all pending changes requested by the client through this
+        interface.
+
+        Only the properties changed through the set_* requests should be changed
+        as a result of this request.
+
+        After this request has been sent, the server must respond with an applied
+        or failed event.
+      </description>
+    </request>
+
+    <event name="applied">
+      <description summary="configuration changes have been applied">
+        Sent after the server has successfully applied the changes.
+      </description>
+    </event>
+
+    <event name="failed">
+      <description summary="configuration changes failed to apply">
+        Sent if the server rejects the changes or failed to apply them. The
+        server should revert any changes made by the apply request that
+        triggered this event.
+      </description>
+    </event>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the output manager">
+        Using this request a client can tell the server that it is not going
+        to use the configuration object anymore. Any changes to the output
+        device that have not been applied will be discarded.
+      </description>
+    </request>
+
+  </interface>
+</protocol>
