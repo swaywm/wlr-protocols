@@ -179,13 +179,16 @@
 
         The naming convention is compositor defined, but limited to
         alphanumeric characters and dashes (-). Each name is unique among all
-        wl_output globals, but if a wl_output global is destroyed the same name
-        may be reused later. The names will also remain consistent across
-        sessions with the same hardware and software configuration.
+        output_device globals, but if a output_device global is destroyed the
+        same name may be reused later. The names will also remain consistent
+        across sessions with the same hardware and software configuration.
 
         Examples of names include 'HDMI-A-1', 'WL-1', 'X11-1', etc. However, do
         not assume that the name is a reflection of an underlying DRM
         connector, X11 connection, etc.
+
+        If the compositor implements xdg_output and this output is enabled,
+        the zxdg_output_v1.name must report the same name.
 
         This event is only sent once per zwlr_output_device_v1, and the
         name does not change over the lifetime of the zwlr_output_device_v1.
@@ -196,12 +199,15 @@
     <event name="description">
       <description summary="human-readable description of this output">
         Many compositors can produce human-readable descriptions of their
-        outputs.  The client may wish to know this description as well, to
+        outputs. The client may wish to know this description as well, to
         communicate the user for various purposes.
 
         The description is a UTF-8 string with no convention defined for its
         contents. Examples might include 'Foocorp 11" Display' or 'Virtual X11
         output via :1'.
+
+        If the compositor implements xdg_output and this output is enabled,
+        the zxdg_output_v1.name must report the description. 
 
         This event is only sent once per zwlr_output_device_v1, and the
         name does not change over the lifetime of the zwlr_output_device_v1.
