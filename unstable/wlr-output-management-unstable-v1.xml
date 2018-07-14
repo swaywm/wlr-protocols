@@ -244,7 +244,7 @@
       <description summary="create a new output configuration object">
         Create a new output configuration object.
       </description>
-      <arg name="id" type="new_id" interface="zwlr_output_device_v1"/>
+      <arg name="id" type="new_id" interface="zwlr_output_configuration_v1"/>
     </request>
 
     <request name="destroy" type="destructor">
