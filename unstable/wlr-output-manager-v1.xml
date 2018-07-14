@@ -219,19 +219,6 @@
       </description>
     </event>
 
-    <event name="disconnected">
-      <description summary="">
-        The disconnected event indicates that the output device is no longer
-        connected to the compositor. The server will no longer send events to
-        this object.
-
-        If the client tries to configure any of the output's properties, it will
-        fail.
-
-        The client should destroy the object after it receives this event.
-      </description>
-    </event>
-
     <request name="destroy" type="destructor">
       <description summary="destroy the output device object">
         Using this request a client can tell the server that it is not going to
