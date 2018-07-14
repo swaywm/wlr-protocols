@@ -95,7 +95,7 @@
       <arg name="refresh" type="int" summary="vertical refresh rate in mHz"/>
     </event>
     
-    <event name="transformation">
+    <event name="transform">
       <description summary="transformations applied to framebuffer">
         This event describes the transformations that are applied to the
         framebuffer before it is displayed.
@@ -103,7 +103,7 @@
         This event is sent after the client binds to the output_device and
         whenever the mode of the output changes.
       </description>
-      <arg name="transformation" type="int" enum="wl_output.transform"/>
+      <arg name="transform" type="int" enum="wl_output.transform"/>
     </event>
     
     <event name="size">
@@ -116,7 +116,7 @@
         will not be the same if the compositor does not scale the surface
         buffers.
 
-        Combined with the current_mode and transformation event, this event
+        Combined with the current_mode and transform event, this event
         effectively describes the scale applied to the output's buffer
         before it is displayed.
 
@@ -266,11 +266,11 @@
         summary="the output device to be configured"/>
     </request>
 
-    <request name="set_transformation">
+    <request name="set_transform">
       <description summary="set the buffer transformation">
         Set the buffer transformation of an output device.
       </description>
-      <arg name="transformation" type="int" enum="wl_output.transform" 
+      <arg name="transform" type="int" enum="wl_output.transform"
         summary="transformation to apply"/>
       <arg name="output_device" type="object" interface="zwlr_output_device_v1"
         summary="the output device to be configured"/>
