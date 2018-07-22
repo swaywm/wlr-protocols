@@ -83,7 +83,7 @@
 
         This event is sent immediately when the gamma control object is created.
       </description>
-      <arg name="size" type="uint"/>
+      <arg name="size" type="uint" summary="number of elements in a ramp"/>
     </event>
 
     <enum name="error">
