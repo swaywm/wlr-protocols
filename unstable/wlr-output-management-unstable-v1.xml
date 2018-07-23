@@ -345,6 +345,8 @@
         server should revert any changes made by the apply request that
         triggered this event.
       </description>
+      <arg name="reason" type="string"
+        summary="describes the reason for the failure"/>
     </event>
 
     <request name="destroy" type="destructor">
