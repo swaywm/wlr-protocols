@@ -67,7 +67,11 @@
 
         When the client binds to the output_device object, the server sends this
         event once for every supported mode.
-        
+
+        If the concept of a specific refresh rate does not apply to the mode,
+        the refresh argument shpuld be zero. An example of this is a monitor
+        with a variable refresh rate.
+
         Not all output devices need to have supported modes. For example, an
         RDP-style output might have no advertised modes.
 
