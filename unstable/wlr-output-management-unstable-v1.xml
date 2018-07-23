@@ -308,6 +308,18 @@
         summary="the output device to be configured"/>
     </request>
 
+    <request name="set_size">
+      <description summary="set the size of an output">
+        Set the size of an output device in the global compositor space.
+      </description>
+      <arg name="width" type="int"
+        summary="width in global compositor space"/>
+      <arg name="height" type="int"
+        summary="height in global compositor space"/>
+      <arg name="output_device" type="object" interface="zwlr_output_device_v1"
+        summary="the output device to be configured"/>
+    </request>
+
     <request name="apply">
       <description summary="apply pending changes">
         Apply all pending changes requested by the client through this
