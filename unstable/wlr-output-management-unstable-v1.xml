@@ -69,7 +69,7 @@
         event once for every supported mode.
 
         If the concept of a specific refresh rate does not apply to the mode,
-        the refresh argument shpuld be zero. An example of this is a monitor
+        the refresh argument should be zero. An example of this is a monitor
         with a variable refresh rate.
 
         Not all output devices need to have supported modes. For example, an
