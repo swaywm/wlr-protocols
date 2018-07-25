@@ -151,16 +151,6 @@
         summary="y position within the global compositor space"/>
     </event>
     
-    <enum name="enablement">
-      <description summary="describes enabled state">
-        Describes whether a device is enabled, i.e. device is used to
-        display content by the compositor. This wraps a boolean around
-        an int to avoid a boolean trap.
-      </description>
-      <entry name="disabled" value="0"/>
-      <entry name="enabled" value="1"/>
-    </enum>
-
     <event name="enabled">
       <description summary="output is enabled or disabled">
         This event describes whether the output is actively displaying a part
@@ -172,7 +162,8 @@
         This event is sent after the client binds to the output_device
         and whenever the output device is enabled or disabled.
       </description>
-      <arg name="enabled" type="int" summary="output enabled state"/>
+      <arg name="enabled" type="int"
+        summary="output enabled state (nonzero if enabled)"/>
     </event>
 
     <event name="name">
@@ -303,7 +294,8 @@
       <description summary="enable or disable the output">
         Enable or disable an output device.
       </description>
-      <arg name="enabled" type="int" summary="output enabled state"/>
+      <arg name="enabled" type="int"
+        summary="output enabled state (nonzero if enabled)"/>
       <arg name="output_device" type="object" interface="zwlr_output_device_v1"
         summary="the output device to be configured"/>
     </request>
