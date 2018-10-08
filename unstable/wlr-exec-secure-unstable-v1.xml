@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="wlr_exec_secure_unstable_v1">
+  <copyright>
+    Copyright © 2018 Drew DeVault
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice (including the next
+    paragraph) shall be included in all copies or substantial portions of the
+    Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.
+  </copyright>
+
+  <description summary="a protocol for executing clients with higher permissions">
+    This protocol allows unprivileged clients to ask the compositor to execute
+    a program which can access protected Wayland protocols.
+
+    The rationale for this protocol is that the execution environment of an
+    arbitrary client cannot be reliably verified by the compositor. Environment
+    variables like LD_PRELOAD may alter the runtime behavior of the client to
+    malicious ends. However, if the compositor creates the client socket and
+    exec's the client program itself, it can be sure of the client's execution
+    environment.
+
+    If a client is run with the WAYLAND_SOCKET environment variable set, it can
+    assume that the socket represents an authenticated Wayland connection and
+    it will be able to use any secure protocols it is afforded. If not, the
+    client will likely connect to the Unix socket specified by WAYLAND_DISPLAY,
+    but it will be an unauthenticated connection. If it needs authenticated
+    protocols to accomplish its basic tasks, it will likely wish to use
+    wlr_exec_secure_unstable_v1 to ask the compositor to execute itself again.
+    It's at the client's discretion to exit once the compositor runs the second
+    process or to wait for it to complete.
+  </description>
+
+  <interface name="zwlr_exec_manager_v1" version="1">
+    <description summary="interface for requesting execution handles">
+      Clients which want the compositor to execute another client should create
+      a zwlr_exec_handle_v1 and use it to configure and run the client.
+    </description>
+
+    <request name="exec_process">
+      <description summary="creates a wlr_exec_handle_v1 resource">
+        Creates an exec_handle for the requested command. The compositor can
+        choose to disallow this request for certain commands, in which case a
+        protocol error is issued. The command will be executed without a shell.
+      </description>
+      <arg name="handle" type="new_id" interface="zwlr_exec_handle_v1"/>
+      <arg name="command" type="array" summary="the command to execute"/>
+    </request>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the manager">
+        All objects created by the manager will still remain valid, until their
+        appropriate destroy request has been called.
+      </description>
+    </request>
+  </interface>
+
+  <interface name="zwlr_exec_handle_v1" version="1">
+    <description summary="an executing or to-be-executed process">
+      This resource represents a process executed by the compositor, or a
+      process which will be executed by the compositor shortly.
+
+      The client should transfer any appropriate state, then send an exec
+      request and await the exit event.
+
+      Once the compositor receives an exec request, it should fork, close all
+      file descriptors (except for the transferred ones), then dup2 them to the
+      appropriate file descriptor number. It should then exec (with PATH lookup,
+      e.g. via execlp or exevp) the requested command. Then it should send the
+      pid event, followed by the exit event when the child terminates.
+    </description>
+
+    <request name="environment">
+      <description summary="set an environment variable in the process">
+        Sets an environment variable for the new process. The compositor can
+        choose not to set any variables, including for example LD_PRELOAD.
+      </description>
+      <arg name="name" type="string" summary="environment variable name"/>
+      <arg name="value" type="string" summary="environment variable value"/>
+    </request>
+
+    <request name="fd">
+      <description summary="transfer a file descriptor to the process">
+        Transfers a file descriptor to the new process. The compositor will use
+        dup2 to assign the specified file descriptor number, then close the
+        danging fd.
+      </description>
+      <arg name="fd" type="fd" summary="file descriptor to transfer"/>
+      <arg name="num" type="uint" summary="first parameter to dup2"/>
+    </request>
+
+    <request name="exec">
+      <description summary="start the new process">
+        Asks the compositor to start the new process. Any request other than
+        destroy after this point is a protocol violation.
+      </description>
+    </request>
+
+    <event name="pid">
+      <description summary="the process's pid is available">
+        The compositor sends this after it has forked, to inform the client of
+        the new process's pid.
+      </description>
+      <arg name="pid" type="uint"
+           summary="pid_t of the child process"/>
+    </event>
+
+    <event name="exit">
+      <description summary="the process has exited">
+        The compositor will send this when the process has terminated, with the
+        exit status. No further events will be sent after this, and further
+        requests will be ignored.
+      </description>
+      <arg name="status" type="uint" summary="exit status of the process"/>
+    </event>
+
+    <request name="destroy" type="destructor">
+      <description summary="delete the exec_handle">
+        Unreferences the exec_handle. If started, the associated process will
+        not be killed. Sending any additional requests after destroy is a
+        protocol error.
+      </description>
+    </request>
+  </interface>
+</protocol>
