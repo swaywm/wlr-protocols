@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="wlr_keyboard_modifiers_unstable_v1">
+  <copyright>
+    Copyright © 2018 Harish Krupo
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+
+  <interface name="zwlr_keyboard_modifiers_v1" version="1">
+    <description summary="lets client recieve the keyboard modifiers">
+
+    </description>
+
+    <request name="get_wlr_keyboard">
+      <description summary="Create a wrapper over wl_keyboard">
+        Retruns a wrapper for the wl_keyboard passed as an argument. The
+        wlr_keyboard can then be used to listen for modifier events even when
+        the client is not focussed.
+      </description>
+      <arg name="id" type="new_id" interface="zwlr_keyboard_v1"/>
+      <arg name="keyboard" type="object" interface="wl_keyboard"/>
+    </request>
+
+    <request name="release" type="destructor">
+      <description summary="destroy Keyboard modifiers"/>
+    </request>
+
+  </interface>
+
+  <interface name="zwlr_keyboard_v1" version="1">
+    <event name="modifiers">
+      <description summary="modifier and group state">
+	      Notifies clients that the modifier and/or group state has
+	      changed, and it should update its local state.
+      </description>
+      <arg name="serial" type="uint" summary="serial number of the modifiers event"/>
+      <arg name="mods_depressed" type="uint" summary="depressed modifiers"/>
+      <arg name="mods_latched" type="uint" summary="latched modifiers"/>
+      <arg name="mods_locked" type="uint" summary="locked modifiers"/>
+      <arg name="group" type="uint" summary="keyboard layout"/>
+    </event>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the wlr_keyboard object">
+        Destroy the object and stop receiving the modifier events.
+      </description>
+    </request>
+
+  </interface>
+
+</protocol>
