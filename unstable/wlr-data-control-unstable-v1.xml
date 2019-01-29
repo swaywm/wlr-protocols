@@ -41,7 +41,7 @@
     interface version number is reset.
   </description>
 
-  <interface name="zwlr_data_control_manager_v1" version="1">
+  <interface name="zwlr_data_control_manager_v1" version="2">
     <description summary="manager to control data devices">
       This interface is a manager that allows creating per-seat data device
       controls.
@@ -71,7 +71,7 @@
     </request>
   </interface>
 
-  <interface name="zwlr_data_control_device_v1" version="1">
+  <interface name="zwlr_data_control_device_v1" version="2">
     <description summary="manage a data device for a seat">
       This interface allows a client to manage a seat's selection.
 
@@ -98,11 +98,13 @@
     <event name="data_offer">
       <description summary="introduce a new wlr_data_control_offer">
         The data_offer event introduces a new wlr_data_control_offer object,
-        which will subsequently be used in the wlr_data_control_device.selection
-        event. Immediately following the wlr_data_control_device.data_offer
-        event, the new data_offer object will send out
-        wlr_data_control_offer.offer events to describe the MIME types it
-        offers.
+        which will subsequently be used in either the
+        wlr_data_control_device.selection event (for the regular clipboard
+        selections) or the wlr_data_control_device.primary_selection event (for
+        the primary clipboard selections). Immediately following the
+        wlr_data_control_device.data_offer event, the new data_offer object
+        will send out wlr_data_control_offer.offer events to describe the MIME
+        types it offers.
       </description>
       <arg name="id" type="new_id" interface="zwlr_data_control_offer_v1"/>
     </event>
@@ -129,6 +131,38 @@
         the client.
       </description>
     </event>
+
+    <!-- Version 2 additions -->
+
+    <event name="primary_selection" since="2">
+      <description summary="advertise new primary selection">
+        The primary_selection event is sent out to notify the client of a new
+        wlr_data_control_offer for the primary selection for this device. The
+        wlr_data_control_device.data_offer and the wlr_data_control_offer.offer
+        events are sent out immediately before this event to introduce the data
+        offer object. The primary_selection event is sent to a client when a
+        new primary selection is set. The wlr_data_control_offer is valid until
+        a new wlr_data_control_offer or NULL is received. The client must
+        destroy the previous primary selection wlr_data_control_offer, if any,
+        upon receiving this event.
+      </description>
+      <arg name="id" type="object" interface="zwlr_data_control_offer_v1"
+        allow-null="true"/>
+    </event>
+
+    <request name="set_primary_selection" since="2">
+      <description summary="copy data to the primary selection">
+        This request asks the compositor to set the primary selection to the
+        data from the source on behalf of the client.
+
+        To unset the primary selection, set the source to NULL.
+
+        The compositor will ignore this request if it does not support primary
+        selection.
+      </description>
+      <arg name="source" type="object" interface="zwlr_data_control_source_v1"
+        allow-null="true"/>
+    </request>
   </interface>
 
   <interface name="zwlr_data_control_source_v1" version="1">
