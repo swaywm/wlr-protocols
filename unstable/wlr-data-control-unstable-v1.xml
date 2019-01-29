@@ -103,9 +103,6 @@
         event, the new data_offer object will send out
         wlr_data_control_offer.offer events to describe the MIME types it
         offers.
-
-        This event replaces the previous data offer, which should be destroyed
-        by the client.
       </description>
       <arg name="id" type="new_id" interface="zwlr_data_control_offer_v1"/>
     </event>
