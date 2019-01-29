@@ -111,7 +111,7 @@
     </event>
 
     <event name="selection">
-      <description summary="introduce a new wlr_data_control_offer">
+      <description summary="advertise new selection">
         The selection event is sent out to notify the client of a new
         wlr_data_control_offer for the selection for this device. The
         wlr_data_control_device.data_offer and the wlr_data_control_offer.offer
