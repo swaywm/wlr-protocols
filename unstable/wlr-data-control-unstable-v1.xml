@@ -120,6 +120,9 @@
         wlr_data_control_offer or NULL is received. The client must destroy the
         previous selection wlr_data_control_offer, if any, upon receiving this
         event.
+
+        The first selection event is sent upon binding the
+        wlr_data_control_device object.
       </description>
       <arg name="id" type="object" interface="zwlr_data_control_offer_v1"
         allow-null="true"/>
@@ -145,6 +148,10 @@
         a new wlr_data_control_offer or NULL is received. The client must
         destroy the previous primary selection wlr_data_control_offer, if any,
         upon receiving this event.
+
+        If the compositor supports primary selection, the first
+        primary_selection event is sent upon binding the
+        wlr_data_control_device object.
       </description>
       <arg name="id" type="object" interface="zwlr_data_control_offer_v1"
         allow-null="true"/>
