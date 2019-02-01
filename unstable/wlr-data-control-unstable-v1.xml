@@ -84,7 +84,8 @@
         the source on behalf of the client.
 
         The given source may not be used in any further set_selection or
-        set_primary_selection requests.
+        set_primary_selection requests. Attempting to use a previously used
+        source is a protocol error.
 
         To unset the selection, set the source to NULL.
       </description>
@@ -166,7 +167,8 @@
         data from the source on behalf of the client.
 
         The given source may not be used in any further set_selection or
-        set_primary_selection requests.
+        set_primary_selection requests. Attempting to use a previously used
+        source is a protocol error.
 
         To unset the primary selection, set the source to NULL.
 
@@ -176,6 +178,11 @@
       <arg name="source" type="object" interface="zwlr_data_control_source_v1"
         allow-null="true"/>
     </request>
+
+    <enum name="error" since="2">
+      <entry name="used_source" value="1"
+        summary="source given to set_selection or set_primary_selection was already used before"/>
+    </enum>
   </interface>
 
   <interface name="zwlr_data_control_source_v1" version="1">
