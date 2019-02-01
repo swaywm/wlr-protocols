@@ -83,6 +83,9 @@
         This request asks the compositor to set the selection to the data from
         the source on behalf of the client.
 
+        The given source may not be used in any further set_selection or
+        set_primary_selection requests.
+
         To unset the selection, set the source to NULL.
       </description>
       <arg name="source" type="object" interface="zwlr_data_control_source_v1"
@@ -161,6 +164,9 @@
       <description summary="copy data to the primary selection">
         This request asks the compositor to set the primary selection to the
         data from the source on behalf of the client.
+
+        The given source may not be used in any further set_selection or
+        set_primary_selection requests.
 
         To unset the primary selection, set the source to NULL.
 
