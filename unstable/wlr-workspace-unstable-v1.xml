@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="wlr_workspace_unstable_v1">
+  <copyright>
+    Copyright © 2018 Christopher Billington
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+
+  <interface name="zwlr_workspace_manager_v1" version="1">
+    <description summary="list and control workspaces">
+
+      Workspaces, also called virtual desktops, are groups of surfaces. A compositor
+      with a concept of workspaces may only show one such group of windows (those of the
+      'active' workspace) at a time. Outputs may be grouped together, such that all
+      outputs share workspaces, or a group of outputs (possibly a single output) may
+      have its own set of workspaces, separate from other outputs. The purpose of this
+      protocol is to enable the creation of taskbars and docks by providing them with a
+      list of workspaces for each group of outputs, and allowing them to set the active
+      workspace on each workspace group corresponding to a set of outputs.
+
+      After a client binds the zwlr_workspace_manager_v1, each workspace group
+      will be sent via the output_group event
+    </description>
+
+    <event name="workspace_group">
+      <description summary="a workspace group has been created">
+        This event is emitted whenever a new workspace group has been created.
+
+        All initial details of the workspace_group (workspaces, outputs) will be sent
+        immediately after this event via the corresponding events in
+        zwlr_workspace_group_handle_v1.
+      </description>
+      <arg name="workspace_group" type="new_id" interface="zwlr_workspace_group_handle_v1"/>
+    </event>
+
+    <event name="finished">
+      <description summary="the compositor has finished with the workspace_manager">
+        This event indicates that the compositor is done sending events to the
+        zwlr_workspace_manager_v1. The server will destroy the object immediately after
+        sending this request, so it will become invalid and the client should free any
+        resources associated with it.
+      </description> 
+    </event> 
+
+    <request name="stop">
+      <description summary="stop sending events">
+        Indicates the client no longer wishes to receive events for new workspace
+        groups. However the compositor may emit further workspace_group events, until
+        the finished event is emitted.
+
+        The client must not send any more requests after this one.
+      </description>
+    </request>
+  </interface>
+
+  <interface name="zwlr_workspace_group_handle_v1" version="1">
+    <description summary="a set of workspaces for a set of outputs">
+      A zwlr_workspace_group_handle_v1 object represents a set of workspaces shared
+      by a set of outputs. Each output may belong to only one workspace group.
+
+      Each workspace group has a list of outputs, conveyed to the client with the
+      output and output_remove events; and a list of workspaces, conveyed to the client
+      with workspace and workspace_remove events.
+    </description>
+
+    <event name="output">
+      <description summary="output added to group">
+        This event is emitted whenever an output is added to the workspace group.
+      </description>
+      <arg name="output" type="object" interface="wl_output"/>
+    </event>
+
+    <event name="output_remove">
+      <description summary="output removed from group">
+        This event is emitted whenever an output is removed from the workspace group.
+      </description>
+      <arg name="output" type="object" interface="wl_output"/>
+    </event>
+
+    <event name="workspace">
+      <description summary="workspace added to group">
+        This event is emitted whenever a workspace is added to the workspace group.
+
+        All initial details of the workspace (number, state) will be sent immediately
+        after this event via the corresponding events in zwlr_workspace_handle_v1.
+      </description>
+      <arg name="workspace" type="new_id" interface="zwlr_workspace_handle_v1"/>
+    </event>
+
+    <event name="workspace_remove">
+      <description summary="workspace removed from group">
+        This event is emitted whenever a workspace is removed from the workspace group
+      </description>
+      <arg name="workspace" type="object" interface="zwlr_workspace_handle_v1"/>
+    </event>
+
+    <event name="done">
+      <description summary="all information about the workspace group has been sent">
+        This event is sent after all changes in the workspace group state have been
+        sent.
+
+        This allows changes to one or more zwlr_workspace_group_handle_v1 properties to
+        be seen as atomic, even if they happen via multiple events. In particular, an
+        output moving from one workspace group to another sends an output event and an
+        output_remove event to the two zwlr_workspace_group_handle_v1 objects in
+        question. The compositor sends both done events only after both other events.
+      </description>
+    </event>
+
+    <event name="destroyed">
+      <description summary="this workspace group has been destroyed">
+        This event means the zwlr_workspace_group_handle_v1 has been destroyed. It is
+        guaranteed there won't be any more events for this
+        zwlr_workspace_group_handle_v1. The zwlr_workspace_group_handle_v1 becomes inert
+        so any requests will be ignored except the destroy request.
+      </description>
+    </event>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the zwlr_workspace_group_handle_v1 object">
+        Destroys the zwlr_workspace_group_handle_v1 object.
+
+        This request should be called either when the client does not want to use the
+        workspace_group anymore or after the closed event to finalize the destruction of
+        the object.
+      </description>
+    </request>
+  </interface>
+
+  <interface name="zwlr_workspace_handle_v1" version="1">
+    <description summary="a workspace belonging to a workspace group">
+      A zwlr_workspace_handle_v1 object represents a a workspace belonging to a
+      workspace group.
+
+      Each workspace group has a number, conveyed to the client with the number event,
+      and a list of states, conveyed to the client with the state event. The client may
+      request the compositor to activate the workspace.
+    </description>
+
+    <event name="number">
+      <description summary="workspace number changed">
+        This event is emitted immediately after the zwlr_workspace_handle_v1 is created
+        and whenever the number of the workspace changed. Workspaces within a workspace
+        group are uniquely and contiguously numbered starting from zero.
+      </description>
+      <arg name="number" type="int"/>
+    </event>
+
+    <event name="state">
+      <description summary="the state of the workspace changed">
+        This event is emitted immediately after the zwlr_workspace_handle_v1 is created
+        and each time the workspace state changes, either because of a compositor action
+        or because of a request in this protocol.
+      </description>
+      <arg name="state" type="array"/>
+    </event>
+
+    <enum name="state">
+      <description summary="types of states on the workspace">
+        The different states that a workspace can have.
+      </description>
+
+      <entry name="active" value="0" summary="the workspace is active"/>
+      <entry name="empty" value="1" summary="the workspace contains no toplevels"/>
+    </enum>
+
+    <event name="done">
+      <description summary="all information about the workspace has been sent">
+        This event is sent after all changes in the workspace state have been sent.
+
+        This allows changes to one or more zwlr_workspace_handle_v1 properties to be
+        seen as atomic, even if they happen via multiple events. In particular, a
+        workspace changing its number sends number events to multiple
+        zwlr_workspace_handle_v1 objects in order to keep their numbers sequential. The
+        compositor sends both done events only after both number events have been sent.
+      </description>
+    </event>
+
+    <event name="destroyed">
+      <description summary="this workspace has been destroyed">
+        This event means the zwlr_workspace_handle_v1 has been destroyed. It is
+        guaranteed there won't be any more events for this zwlr_workspace_handle_v1. The
+        zwlr_workspace_handle_v1 becomes inert so any requests will be ignored except
+        the destroy request.
+      </description>
+    </event>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the zwlr_workspace_group_handle_v1 object">
+        Destroys the zwlr_workspace_handle_v1 object.
+
+        This request should be called either when the client does not want to use the
+        workspace_group anymore or after the closed event to finalize the destruction of
+        the object.
+      </description>
+    </request>
+
+    <request name="activate">
+      <description summary="activate the workspace">
+        Request that this workspace be set as the active workspace for its workspace
+        group.
+
+        There is no guarantee the workspace will be actually activated.
+      </description>
+    </request>
+  </interface>
+</protocol>
