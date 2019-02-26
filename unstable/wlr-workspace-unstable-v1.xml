@@ -27,17 +27,18 @@
 
   <interface name="zwlr_workspace_manager_v1" version="1">
     <description summary="list and control workspaces">
-
       Workspaces, also called virtual desktops, are groups of surfaces. A compositor
       with a concept of workspaces may only show some such groups of surfaces (those of
       'active' workspaces) at a time. Workspaces may contain surfaces from one or more
-      outputs, such that activating the workspace will cause the compositor to display
-      the workspace's surfaces on those outputs. In this way, each output may have its
-      own unique set of workspaces, or all outputs (or any other arbitrary grouping) may
-      share workspaces. Workspaces may be conceptually arranged in a grid of arbitrary
-      dimension. The purpose of this protocol is to enable the creation of taskbars and
-      docks by providing them with a list of workspaces and their properties, and
-      allowing them to activate and deactivate workspaces.
+      outputs, such that activating the workspace will request that the compositor
+      display the workspace's surfaces on those outputs, whereas the compositor may hide
+      or otherwise de-emphasise surfaces that are associated only with inactive
+      workspaces. By associating a set of outputs with each workspace, each output may
+      have its own unique set of workspaces, or all outputs (or any other arbitrary
+      grouping) may share workspaces. Workspaces may be conceptually arranged in a grid
+      of arbitrary dimension. The purpose of this protocol is to enable the creation of
+      taskbars and docks by providing them with a list of workspaces and their
+      properties, and allowing them to activate and deactivate workspaces.
 
       After a client binds the zwlr_workspace_manager_v1, each workspace will be sent
       via the workspace event.
