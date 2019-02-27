@@ -198,5 +198,23 @@
         There is no guarantee the workspace will be actually deactivated.
       </description>
     </request>
+
+    <request name="done">
+      <description summary="all requests about the workspace have been sent">
+        The client must send this request after it has finished sending other requests.
+        The compositor must process a series of requests preceding a done request
+        atomically. This includes requests on other zwlr_workspace_handle_v1 objects: if
+        the client sends requests for multiple zwlr_workspace_handle_v1 objects, the
+        compositor must wait until a done request has been sent for every
+        zwlr_workspace_handle_v1 involved, and process all of the preceding requests
+        atomically. This is important so that say, deactivating one workspace and
+        activating another can be treated atomically.
+
+        This allows changes to the workspace properties to be seen as atomic, even if
+        they happen via multiple events, and even if they involve multiple
+        zwlr_workspace_handle_v1 objects.
+      </description>
+    </request>
+
   </interface>
 </protocol>
