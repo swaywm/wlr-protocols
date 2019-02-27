@@ -30,15 +30,17 @@
       Workspaces, also called virtual desktops, are groups of surfaces. A compositor
       with a concept of workspaces may only show some such groups of surfaces (those of
       'active' workspaces) at a time. Workspaces may contain surfaces from one or more
-      outputs, such that activating the workspace will request that the compositor
-      display the workspace's surfaces on those outputs, whereas the compositor may hide
-      or otherwise de-emphasise surfaces that are associated only with inactive
+      outputs, and 'activating' a workspace is a request that the compositor display
+      those surfaces on those outputs as normal, whereas the compositor may hide or
+      otherwise de-emphasise surfaces that are associated only with 'inactive'
       workspaces. By associating a set of outputs with each workspace, each output may
       have its own unique set of workspaces, or all outputs (or any other arbitrary
-      grouping) may share workspaces. Workspaces may be conceptually arranged in a grid
-      of arbitrary dimension. The purpose of this protocol is to enable the creation of
-      taskbars and docks by providing them with a list of workspaces and their
-      properties, and allowing them to activate and deactivate workspaces.
+      grouping) may share workspaces. Compositors may optionally conceptually arrange
+      workspaces with a common set of outputs in an N-dimensional grid.
+
+      The purpose of this protocol is to enable the creation of taskbars and docks by
+      providing them with a list of workspaces and their properties, and allowing them
+      to activate and deactivate workspaces.
 
       After a client binds the zwlr_workspace_manager_v1, each workspace will be sent
       via the workspace event.
@@ -87,14 +89,14 @@
       activate or deactivate the workspace.
     </description>
 
-    <event name="output">
+    <event name="enter">
       <description summary="output added to workspace">
         This event is emitted whenever an output is added to the workspace.
       </description>
       <arg name="output" type="object" interface="wl_output"/>
     </event>
 
-    <event name="output_remove">
+    <event name="leave">
       <description summary="output removed from workspace">
         This event is emitted whenever an output is removed from the workspace.
       </description>
@@ -106,19 +108,27 @@
         This event is emitted immediately after the zwlr_workspace_handle_v1 is created
         and whenever the name of the workspace changes.
       </description>
-      <arg name="number" type="int"/>
+      <arg name="name" type="string"/>
     </event>
 
     <event name="coordinates">
       <description summary="workspace coordinates changed">
-        If the compositor assigns coordinates to workspaces, this event is emitted
-        immediately after the zwlr_workspace_handle_v1 is created and whenever the
-        coordinates of the workspace change. Coordinates have an arbitrary number of
-        dimensions with an unsigned integer position for each dimension. Among a set of
-        workspaces that have identical sets of outputs, workspaces must have unique
-        coordinates with the same number of dimensions, such that the workspaces form a
-        grid with at most one workspace in each position. By convention, 2D coordinates
-        represent [y_pos, x_pos].
+        This event is used to organize workspaces spatially into an N-dimensional grid,
+        and if supported, is emitted immediately after the zwlr_workspace_handle_v1 is
+        created and whenever the coordinates of the workspace change. Compositors may
+        not send this event if they do not conceptually arrange workspaces in this way.
+
+        Coordinates have an arbitrary number of dimensions with an uint32 position along
+        each dimension. By convention, the first dimension is X, the second Y, the third
+        Z, and so on. The compositor may chose to utilize these events for a more novel
+        workspace layout convention, however. No guarantee is made about the grid being
+        filled or bounded; there may be a workspace at coordinate 1 and another at
+        coordinate 1000 and none in between.
+
+        Among a set of workspaces that have identical sets of outputs, workspaces must
+        have unique coordinates of the same dimensionality. Coordinates otherwise need
+        not be unique: in this way independent grids can exist for each set of outputs
+        that share workspaces.
       </description>
       <arg name="coordinates" type="array"/>
     </event>
