@@ -117,13 +117,16 @@
         and if supported, is emitted immediately after the zwlr_workspace_handle_v1 is
         created and whenever the coordinates of the workspace change. Compositors may
         not send this event if they do not conceptually arrange workspaces in this way.
+        If compositors simply number workspaces, without any geometric interpretation,
+        they may send 1D coordinates, which clients should not interpret as implying any
+        geometry.
 
         Coordinates have an arbitrary number of dimensions with an uint32 position along
-        each dimension. By convention, the first dimension is X, the second Y, the third
-        Z, and so on. The compositor may chose to utilize these events for a more novel
-        workspace layout convention, however. No guarantee is made about the grid being
-        filled or bounded; there may be a workspace at coordinate 1 and another at
-        coordinate 1000 and none in between.
+        each dimension. By convention if N>1, the first dimension is X, the second Y,
+        the third Z, and so on. The compositor may chose to utilize these events for a
+        more novel workspace layout convention, however. No guarantee is made about the
+        grid being filled or bounded; there may be a workspace at coordinate 1 and
+        another at coordinate 1000 and none in between.
 
         Among a set of workspaces that have identical sets of outputs, workspaces must
         have unique coordinates of the same dimensionality. Coordinates otherwise need
@@ -199,14 +202,14 @@
       </description>
     </request>
 
-    <request name="done">
+    <request name="commit">
       <description summary="all requests about the workspace have been sent">
         The client must send this request after it has finished sending other requests.
-        The compositor must process a series of requests preceding a done request
+        The compositor must process a series of requests preceding a commit request
         atomically. This includes requests on other zwlr_workspace_handle_v1 objects: if
         the client sends requests for multiple zwlr_workspace_handle_v1 objects, the
-        compositor must wait until a done request has been sent for every
-        zwlr_workspace_handle_v1 involved, and process all of the preceding requests
+        compositor must wait until a commit request has been sent for every one of those
+        zwlr_workspace_handle_v1 objects, and process all of the preceding requests
         atomically. This is important so that say, deactivating one workspace and
         activating another can be treated atomically.
 
