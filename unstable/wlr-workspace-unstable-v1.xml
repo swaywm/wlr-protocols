@@ -84,12 +84,12 @@
       A zwlr_workspace_group_handle_v1 object represents a a workspace group
       that is assigned a set of outputs and contains a number of workspaces.
 
-      The set of outputs assigned to the workspace group is conveyed to the
-      client via enter and leave events, and ita workspaces are conveyed with
-      the workspace event.
+      The set of outputs assigned to the workspace group is conveyed to the client via
+      output_enter and output_leave events, and its workspaces are conveyed with
+      workspace events.
     </description>
 
-    <event name="enter">
+    <event name="output_enter">
       <description summary="output assigned to workspace group">
         This event is emitted whenever an output is assigned to the workspace
         group.
@@ -97,7 +97,7 @@
       <arg name="output" type="object" interface="wl_output"/>
     </event>
 
-    <event name="leave">
+    <event name="output_leave">
       <description summary="output removed from workspace group">
         This event is emitted whenever an output is removed from the workspace
         group.
@@ -124,7 +124,7 @@
         This allows changes to one or more zwlr_workspace_group_handle_v1
         properties to be seen as atomic, even if they happen via multiple
         events. In particular, an output moving from one workspace group to
-        another sends an enter event and a leave event to the two
+        another sends an output_enter event and an output_leave event to the two
         zwlr_workspace_group_handle_v1 objects in question. The compositor sends
         both done events only after both other events.
       </description>
