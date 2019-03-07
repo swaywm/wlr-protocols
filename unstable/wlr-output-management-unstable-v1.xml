@@ -292,7 +292,8 @@
 
       First, the client needs to setup the output configuration. Each head can
       be either enabled (and configured) or disabled. It is a protocol error to
-      send two enable_head or disable_head requests with the same head.
+      send two enable_head or disable_head requests with the same head. It is a
+      protocol error to omit a head in a configuration.
 
       Then, the client can apply or test the configuration. The compositor will
       then reply with a succeeded, failed or cancelled event. Finally the client
@@ -300,9 +301,11 @@
     </description>
 
     <enum name="error">
-      <entry name="head_already_configured" value="1"
+      <entry name="already_configured_head" value="1"
         summary="head has been configured twice"/>
-      <entry name="already_used" value="2"
+      <entry name="unconfigured_head" value="2"
+        summary="head has not been configured"/>
+      <entry name="already_used" value="3"
         summary="request sent after configuration has been applied or tested"/>
     </enum>
 
