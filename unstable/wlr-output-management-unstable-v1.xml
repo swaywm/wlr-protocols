@@ -26,7 +26,7 @@
   </copyright>
 
   <description summary="protocol to configure output devices">
-    This protocol exposes interfaces to get and change output device
+    This protocol exposes interfaces to obtain and modify output device
     configuration.
 
     Warning! The protocol described in this file is experimental and
@@ -116,19 +116,19 @@
 
   <interface name="zwlr_output_head_v1" version="1">
     <description summary="output device">
-      A head is an output device. The difference with wl_output is that heads
-      are advertized even if they are turned off. A head object only advertises
-      properties and cannot be used directly to change them. In order to update
-      some properties, one needs to create a wlr_output_configuration object.
+      A head is an output device. The difference between a wl_output object and
+      a head is that heads are advertised even if they are turned off. A head
+      object only advertises properties and cannot be used directly to change
+      them.
 
       A head has some read-only properties: mode, name, description and
       physical_size. These cannot be changed by clients.
 
-      enabled and current_mode are physical properties. Updating them might take
-      some time, depending on hardware limitations.
+      Other properties can be updated via a wlr_output_configuration object.
 
-      position, transform and scale are logical properties. They describe how
-      the output is mapped in the global compositor space.
+      Properties sent via this interface are applied atomically via the
+      wlr_output_manager.done event. No guarantees are made regarding the order
+      in which properties are sent.
     </description>
 
     <event name="mode">
@@ -168,7 +168,9 @@
 
         The description is a UTF-8 string with no convention defined for its
         contents. Examples might include 'Foocorp 11" Display' or 'Virtual X11
-        output via :1'.
+        output via :1'. However, do not assume that the name is a reflection of
+        the make, model, serial of the underlying DRM connector or the display
+        name of the underlying X11 connection, etc.
 
         If the compositor implements xdg-output and this head is enabled,
         the xdg_output.description must report the same description.
@@ -251,6 +253,10 @@
 
       Some heads don't support output modes, in which case modes won't be
       advertised.
+
+      Properties sent via this interface are applied atomically via the
+      wlr_output_manager.done event. No guarantees are made regarding the order
+      in which properties are sent.
     </description>
 
     <event name="size">
@@ -322,7 +328,7 @@
 
     <request name="disable_head">
       <description summary="disable a head">
-        Disable a head. The head's properties are irrelevant in this case.
+        Disable a head.
       </description>
       <arg name="head" type="object" interface="zwlr_output_head_v1"
         summary="the head to be disabled"/>
