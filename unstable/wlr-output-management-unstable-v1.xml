@@ -131,13 +131,6 @@
       in which properties are sent.
     </description>
 
-    <event name="mode">
-      <description summary="advertise a supported mode">
-        If the head supports modes, this event is sent once per supported mode.
-      </description>
-      <arg name="mode" type="new_id" interface="zwlr_output_mode_v1"/>
-    </event>
-
     <event name="name">
       <description summary="head name">
         This event describes the head name.
@@ -192,6 +185,32 @@
       <arg name="height" type="int" summary="height in millimeters of the output"/>
     </event>
 
+    <event name="arbitrary_modes">
+      <description summary="head supports arbitrary modes">
+        This event is sent if the head supports arbitrary modes.
+
+        When arbitrary modes are not supported, the client should prefer to use
+        fixed modes advertised with the mode event.
+
+        When arbitrary modes are supported, there is no fixed list of modes. The
+        only mode is the current mode. Custom modes will need to be used to
+        change the current mode.
+      </description>
+    </event>
+
+    <event name="mode">
+      <description summary="introduce a mode">
+        This event introduces a mode for this head.
+
+        If the head doesn't support arbitrary modes, this event is sent once
+        per supported mode.
+
+        If the head supports arbitrary modes, this event is sent once for the
+        current mode if the head is enabled.
+      </description>
+      <arg name="mode" type="new_id" interface="zwlr_output_mode_v1"/>
+    </event>
+
     <event name="enabled">
       <description summary="head is enabled or disabled">
         This event describes whether the head is enabled. A disabled head is not
@@ -206,7 +225,7 @@
     <event name="current_mode">
       <description summary="current mode">
         This event describes the mode currently in use for this head. It is only
-        sent if the output is enabled and supports modes.
+        sent if the output is enabled.
       </description>
       <arg name="mode" type="object" interface="zwlr_output_mode_v1"/>
     </event>
@@ -272,7 +291,8 @@
 
     <event name="refresh">
       <description summary="mode refresh rate">
-        This event describes the mode's fixed vertical refresh rate, if any.
+        This event describes the mode's fixed vertical refresh rate. It is only
+        sent if the mode has a fixed refresh rate.
       </description>
       <arg name="refresh" type="int" summary="vertical refresh rate in mHz"/>
     </event>
@@ -414,8 +434,9 @@
 
     <enum name="error">
       <entry name="invalid_mode" value="1" summary="mode doesn't belong to head"/>
-      <entry name="invalid_transform" value="2" summary="transform value outside enum"/>
-      <entry name="invalid_scale" value="3" summary="scale negative or zero"/>
+      <entry name="invalid_custom_mode" value="2" summary="mode is invalid"/>
+      <entry name="invalid_transform" value="3" summary="transform value outside enum"/>
+      <entry name="invalid_scale" value="4" summary="scale negative or zero"/>
     </enum>
 
     <request name="set_mode">
@@ -423,6 +444,17 @@
         This request sets the head's mode.
       </description>
       <arg name="mode" type="object" interface="zwlr_output_mode_v1"/>
+    </request>
+
+    <request name="set_custom_mode">
+      <description summary="set a custom mode">
+        This request assigns a custom mode to the head. The size is given in
+        physical hardware units of the output device. If set to zero, the
+        refresh rate is unspecified.
+      </description>
+      <arg name="width" type="int" summary="width of the mode in hardware units"/>
+      <arg name="height" type="int" summary="height of the mode in hardware units"/>
+      <arg name="refresh" type="int" summary="vertical refresh rate in mHz or zero"/>
     </request>
 
     <request name="set_position">
