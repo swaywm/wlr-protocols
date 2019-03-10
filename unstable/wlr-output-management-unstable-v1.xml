@@ -185,28 +185,10 @@
       <arg name="height" type="int" summary="height in millimeters of the output"/>
     </event>
 
-    <event name="arbitrary_modes">
-      <description summary="head supports arbitrary modes">
-        This event is sent if the head supports arbitrary modes.
-
-        When arbitrary modes are not supported, the client should prefer to use
-        fixed modes advertised with the mode event.
-
-        When arbitrary modes are supported, there is no fixed list of modes. The
-        only mode is the current mode. Custom modes will need to be used to
-        change the current mode.
-      </description>
-    </event>
-
     <event name="mode">
       <description summary="introduce a mode">
-        This event introduces a mode for this head.
-
-        If the head doesn't support arbitrary modes, this event is sent once
-        per supported mode.
-
-        If the head supports arbitrary modes, this event is sent once for the
-        current mode if the head is enabled.
+        This event introduces a mode for this head. It is sent once per
+        supported mode.
       </description>
       <arg name="mode" type="new_id" interface="zwlr_output_mode_v1"/>
     </event>
@@ -430,13 +412,16 @@
   <interface name="zwlr_output_configuration_head_v1" version="1">
     <description summary="head configuration">
       This object is used by the client to update a single head's configuration.
+
+      It is a protocol error to set the same property twice.
     </description>
 
     <enum name="error">
-      <entry name="invalid_mode" value="1" summary="mode doesn't belong to head"/>
-      <entry name="invalid_custom_mode" value="2" summary="mode is invalid"/>
-      <entry name="invalid_transform" value="3" summary="transform value outside enum"/>
-      <entry name="invalid_scale" value="4" summary="scale negative or zero"/>
+      <entry name="already_set" value="1" summary="property has already been set"/>
+      <entry name="invalid_mode" value="2" summary="mode doesn't belong to head"/>
+      <entry name="invalid_custom_mode" value="3" summary="mode is invalid"/>
+      <entry name="invalid_transform" value="4" summary="transform value outside enum"/>
+      <entry name="invalid_scale" value="5" summary="scale negative or zero"/>
     </enum>
 
     <request name="set_mode">
@@ -451,6 +436,8 @@
         This request assigns a custom mode to the head. The size is given in
         physical hardware units of the output device. If set to zero, the
         refresh rate is unspecified.
+
+        It is a protocol error to set both a mode and a custom mode.
       </description>
       <arg name="width" type="int" summary="width of the mode in hardware units"/>
       <arg name="height" type="int" summary="height of the mode in hardware units"/>
