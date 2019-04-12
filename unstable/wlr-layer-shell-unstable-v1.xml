@@ -138,8 +138,8 @@
         to only two parallel edges or anchored to all edges, a positive value
         will be treated the same as zero.
 
-        A positive zone is the number of surface-local coordinates to consider
-        exclusive.
+        A positive zone is the distance from the edge in surface-local
+        coordinates to consider exclusive.
 
         Surfaces that do not wish to have an exclusive zone may instead specify
         how they should interact with surfaces that do. If set to zero, the
