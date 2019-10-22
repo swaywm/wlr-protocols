@@ -7,6 +7,7 @@ unstable_protocols = \
 	unstable/wlr-gamma-control-unstable-v1.xml \
 	unstable/wlr-input-inhibitor-unstable-v1.xml \
 	unstable/wlr-layer-shell-unstable-v1.xml \
+	unstable/wlr-output-power-management-v1.xml \
 	unstable/wlr-screencopy-unstable-v1.xml
 
 check:
