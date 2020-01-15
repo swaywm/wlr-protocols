@@ -295,7 +295,7 @@
 
         Layer is double-buffered, see wl_surface.commit.
       </description>
-      <arg name="layer" type="uint" enum="layer" summary="layer to move this surface to"/>
+      <arg name="layer" type="uint" enum="zwlr_layer_shell_v1.layer" summary="layer to move this surface to"/>
     </request>
   </interface>
 </protocol>
