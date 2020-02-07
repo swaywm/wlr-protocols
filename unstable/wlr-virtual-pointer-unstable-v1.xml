@@ -29,6 +29,13 @@
       requests are mostly mirror opposites of those specified in wl_pointer.
     </description>
 
+    <enum name="error">
+      <entry name="invalid_axis" value="0"
+        summary="client sent invalid axis enumeration value" />
+      <entry name="invalid_axis_source" value="1"
+        summary="client sent invalid axis source enumeration value" />
+    </enum>
+
     <request name="motion">
       <description summary="pointer relative motion event">
         The pointer has moved by a relative amount to the previous request.
@@ -123,6 +130,10 @@
       </description>
       <arg name="seat" type="object" interface="wl_seat" allow-null="true"/>
       <arg name="id" type="new_id" interface="zwlr_virtual_pointer_v1"/>
+    </request>
+
+    <request name="destroy" type="destructor" since="1">
+      <description summary="destroy the virtual pointer manager"/>
     </request>
   </interface>
 </protocol>
