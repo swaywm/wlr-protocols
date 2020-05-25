@@ -103,7 +103,7 @@
         The client should then create a buffer with the provided attributes, and
         send a "copy" request.
       </description>
-      <arg name="format" type="uint" summary="buffer format"/>
+      <arg name="format" type="uint" enum="wl_shm.format" summary="buffer format"/>
       <arg name="width" type="uint" summary="buffer width"/>
       <arg name="height" type="uint" summary="buffer height"/>
       <arg name="stride" type="uint" summary="buffer stride"/>
