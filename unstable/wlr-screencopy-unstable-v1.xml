@@ -96,12 +96,13 @@
     </description>
 
     <event name="buffer">
-      <description summary="buffer information">
-        Provides information about the frame's buffer. This event is sent once
-        as soon as the frame is created.
+      <description summary="wl_shm buffer information">
+        Provides information about wl_shm buffer parameters that need to be
+        used for this frame. This event is sent once as soon as the frame is
+        created.
 
-        The client should then create a buffer with the provided attributes, and
-        send a "copy" request.
+        The client should then create a buffer with the provided attributes via
+        wl_shm_pool.create_buffer, and send a "copy" request.
       </description>
       <arg name="format" type="uint" enum="wl_shm.format" summary="buffer format"/>
       <arg name="width" type="uint" summary="buffer width"/>
