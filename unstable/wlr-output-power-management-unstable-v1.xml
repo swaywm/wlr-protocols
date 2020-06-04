@@ -79,7 +79,7 @@
     </enum>
 
     <enum name="error">
-      <entry name="invalid_mode" value="1" summary="inexistent power save mode"/>
+      <entry name="invalid_mode" value="1" summary="nonexistent power save mode"/>
     </enum>
 
     <request name="set_mode">
