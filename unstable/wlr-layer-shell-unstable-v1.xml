@@ -92,6 +92,34 @@
         are not affected.
       </description>
     </request>
+
+    <event name="ping" since="3">
+      <description summary="check if the client is alive">
+        The ping event asks the client if it's still alive. Clients must
+        make a pong request passing the provided serial back to the compositor.
+
+        It's unspecified what will happen if the client doesn't respond to
+        the ping request, or in what time frame.
+
+        The compositor may use this request in order to achieve frame-perfect
+        handling of new outputs. Because of this, if a client wishes to
+        create a new layer surface in response to the creation of a new
+        output global, the client should make the get_layer_surface request
+        immediately on receiving the wl_registry.global event with the new
+        output and before processing any further events.
+      </description>
+      <arg name="serial" type="uint" summary="pass this to the pong request"/>
+    </event>
+
+    <request name="pong" since="3">
+      <description summary="respond to a ping">
+        Confirm to the compositor that the client is still alive. This
+        request should be made immediately on receiving the ping event from
+        the compositor. The serial sent with the ping event must be passed
+        along in the request.
+      </description>
+      <arg name="serial" type="uint" summary="serial of the ping event"/>
+    </request>
   </interface>
 
   <interface name="zwlr_layer_surface_v1" version="3">
