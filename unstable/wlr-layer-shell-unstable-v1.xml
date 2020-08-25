@@ -47,6 +47,12 @@
         or manipulate a buffer prior to the first layer_surface.configure call
         must also be treated as errors.
 
+        After creating a layer_surface object and setting it up, the client
+        must perform an initial commit without any buffer attached.
+        The compositor will reply with a layer_surface.configure event.
+        The client must acknowledge it and is then allowed to attach a buffer
+        to map the surface.
+
         You may pass NULL for output to allow the compositor to decide which
         output to use. Generally this will be the one that the user most
         recently interacted with.
@@ -103,6 +109,14 @@
       Layer surface state (layer, size, anchor, exclusive zone,
       margin, interactivity) is double-buffered, and will be applied at the
       time wl_surface.commit of the corresponding wl_surface is called.
+
+      Attaching a null buffer to a layer surface unmaps it.
+
+      Unmapping a layer_surface means that the surface cannot be shown by the
+      compositor until it is explicitly mapped again. The layer_surface
+      returns to the state it had right after layer_shell.get_layer_surface.
+      The client can re-map the surface by performing a commit without any
+      buffer attached, waiting for a configure event and handling it as usual.
     </description>
 
     <request name="set_size">
