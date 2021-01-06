@@ -203,13 +203,56 @@
       <arg name="left" type="int"/>
     </request>
 
+    <enum name="keyboard_interactivity">
+      <description summary="types of keyboard interaction possible for a layer shell surface">
+        Types of keyboard interaction possible for layer shell surfaces. The
+        rationale for this is twofold: (1) some applications are not interested
+        in keyboard events and not allowing them to be focused can improve the
+        desktop experience; (2) some applications will want to take exclusive
+        keyboard focus.
+      </description>
+
+      <entry name="none" value="0">
+        <description summary="no keyboard focus is possible">
+          This value indicates that this surface is not interested in keyboard
+          events and the compositor should never assign it the keyboard focus.
+
+          This is the default value, set for newly created layer shell surfaces.
+
+          This is useful for e.g. desktop widgets that display information or
+          only have interaction with non-keyboard input devices.
+        </description>
+      </entry>
+      <entry name="exclusive" value="1">
+        <description summary="request exclusive keyboard focus">
+          Request exclusive keyboard focus if this surface is above the shell surface layer.
+
+          For the top and overlay layers, the seat will always give
+          exclusive keyboard focus to the top-most layer which has keyboard
+          interactivity set to exclusive. If this layer contains multiple
+          surfaces with keyboard interactivity set to exclusive, the compositor
+          determines the one receiving keyboard events in an implementation-
+          defined manner. In this case, no guarantee is made when this surface
+          will receive keyboard focus (if ever).
+
+          For the bottom and background layers, the compositor is allowed to use
+          normal focus semantics.
+
+          This setting is mainly intended for applications that need to ensure
+          they receive all keyboard events, such as a lock screen or a password
+          prompt.
+        </description>
+      </entry>
+    </enum>
+
     <request name="set_keyboard_interactivity">
       <description summary="requests keyboard events">
-        Set to 1 to request that the seat send keyboard events to this layer
-        surface. For layers below the shell surface layer, the seat will use
-        normal focus semantics. For layers above the shell surface layers, the
-        seat will always give exclusive keyboard focus to the top-most layer
-        which has keyboard interactivity set to true.
+        Set how keyboard events are delivered to this surface. By default,
+        layer shell surfaces do not receive keyboard events; this request can
+        be used to change this.
+
+        This setting is inherited by child surfaces set by the get_popup
+        request.
 
         Layer surfaces receive pointer, touch, and tablet events normally. If
         you do not want to receive them, set the input region on your surface
@@ -217,7 +260,7 @@
 
         Keyboard interactivity is double-buffered, see wl_surface.commit.
       </description>
-      <arg name="keyboard_interactivity" type="uint"/>
+      <arg name="keyboard_interactivity" type="uint" enum="keyboard_interactivity"/>
     </request>
 
     <request name="get_popup">
