@@ -25,7 +25,7 @@
     THIS SOFTWARE.
   </copyright>
 
-  <interface name="zwlr_layer_shell_v1" version="3">
+  <interface name="zwlr_layer_shell_v1" version="4">
     <description summary="create surfaces that are layers of the desktop">
       Clients can use this interface to assign the surface_layer role to
       wl_surfaces. Such surfaces are assigned to a "layer" of the output and
@@ -100,7 +100,7 @@
     </request>
   </interface>
 
-  <interface name="zwlr_layer_surface_v1" version="3">
+  <interface name="zwlr_layer_surface_v1" version="4">
     <description summary="layer metadata interface">
       An interface that may be implemented by a wl_surface, for surfaces that
       are designed to be rendered as a layer of a stacked desktop-like
@@ -241,6 +241,27 @@
           This setting is mainly intended for applications that need to ensure
           they receive all keyboard events, such as a lock screen or a password
           prompt.
+        </description>
+      </entry>
+      <entry name="on_demand" value="2" since="4">
+        <description summary="request regular keyboard focus semantics">
+          This requests the compositor to allow this surface to be focused and
+          unfocused by the user in an implementation-defined manner. The user
+          should be able to unfocus this surface even regardless of the layer
+          it is on.
+
+          Typically, the compositor will want to use its normal mechanism to
+          manage keyboard focus between layer shell surfaces with this setting
+          and regular toplevels on the desktop layer (e.g. click to focus).
+          Nevertheless, it is possible for a compositor to require a special
+          interaction to focus or unfocus layer shell surfaces (e.g. requiring
+          a click even if focus follows the mouse normally, or providing a
+          keybinding to switch focus between layers).
+
+          This setting is mainly intended for desktop shell components (e.g.
+          panels) that allow keyboard interaction. Using this option can allow
+          implementing a desktop shell that can be fully usable without the
+          mouse.
         </description>
       </entry>
     </enum>
