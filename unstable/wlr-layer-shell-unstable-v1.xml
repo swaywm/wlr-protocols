@@ -215,7 +215,7 @@
         you do not want to receive them, set the input region on your surface
         to an empty region.
 
-        Events is double-buffered, see wl_surface.commit.
+        Keyboard interactivity is double-buffered, see wl_surface.commit.
       </description>
       <arg name="keyboard_interactivity" type="uint"/>
     </request>
