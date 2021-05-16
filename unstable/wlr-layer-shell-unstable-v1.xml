@@ -346,6 +346,12 @@
 
         If the width or height arguments are zero, it means the client should
         decide its own window dimension.
+
+        If this event is associated with a change to the properties of the
+        output, then it will be sent after the events announcing the property
+        changes have been sent. For example, if an output changes size, then
+        xdg_output.logical_size, ..., xdg_output.done would be sent before
+        zwlr_layer_surface_v1.configure .
       </description>
       <arg name="serial" type="uint"/>
       <arg name="width" type="uint"/>
