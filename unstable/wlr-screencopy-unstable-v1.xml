@@ -38,7 +38,7 @@
     interface version number is reset.
   </description>
 
-  <interface name="zwlr_screencopy_manager_v1" version="3">
+  <interface name="zwlr_screencopy_manager_v1" version="4">
     <description summary="manager to inform clients and begin capturing">
       This object is a manager which offers requests to start capturing from a
       source.
@@ -47,6 +47,9 @@
     <request name="capture_output">
       <description summary="capture an output">
         Capture the next frame of an entire output.
+
+        When overlay_cursor is 0, software cursors will still be visible on
+        the frame.
       </description>
       <arg name="frame" type="new_id" interface="zwlr_screencopy_frame_v1"/>
       <arg name="overlay_cursor" type="int"
@@ -78,9 +81,29 @@
         appropriate destroy request has been called.
       </description>
     </request>
+
+    <!-- Version 4 additions -->
+    <request name="capture_cursor" since="3">
+      <description summary="capture the hardware cursor">
+        Capture the current hardware cursor used by the compositor, if any.
+      </description>
+      <arg name="cursor" type="new_id" interface="zwlr_screencopy_frame_v1"/>
+      <arg name="seat" type="object" interface="wl_seat"/>
+    </request>
+
+    <request name="pointer_position" since="3">
+      <description summary="report the cursor position">
+        Creates an object that reports the current pointer position on the
+        given wl_output for the given wl_seat.
+      </description>
+      <arg name="reporter" type="new_id"
+        interface="zwlr_screencopy_pointer_reporter_v1"/>
+      <arg name="seat" type="object" interface="wl_seat"/>
+      <arg name="output" type="object" interface="wl_output"/>
+    </request>
   </interface>
 
-  <interface name="zwlr_screencopy_frame_v1" version="3">
+  <interface name="zwlr_screencopy_frame_v1" version="4">
     <description summary="a frame ready for copy">
       This object represents a single frame.
 
@@ -185,6 +208,9 @@
     <request name="copy_with_damage" since="2">
       <description summary="copy the frame when it's damaged">
         Same as copy, except it waits until there is damage to copy.
+
+        It is a protocol error to send this request on a zwlr_screencopy_frame_v1
+        that is created by zwlr_screencopy_manager_v1.capture_cursor.
       </description>
       <arg name="buffer" type="object" interface="wl_buffer"/>
     </request>
@@ -228,5 +254,57 @@
         types, and send a "copy" request.
       </description>
     </event>
+
+    <!-- Version 4 additions -->
+    <event name="hotspot" since="4">
+      <description summary="cursor hotspot information">
+        Provides information about cursor hotspot. This event is sent once after
+        the frame is created if the frame is created by
+        zwlr_screencopy_manager_v1.capture_cursor.
+      </description>
+      <arg name="x" type="uint" summary="cursor hotspot x coordinate"/>
+      <arg name="y" type="uint" summary="cursor hotspot y coordinate"/>
+    </event>
+  </interface>
+
+  <interface name="zwlr_screencopy_pointer_reporter_v1" version="1">
+    <description summary="reports pointer information for a seat">
+      This object reports pointer information for a given wl_seat on the given
+      wl_output until destroyed.
+
+      Information reported include the pointer position and cursor image.
+    </description>
+
+    <event name="position">
+      <description summary="reports current pointer position">
+        This event is sent every time the pointer on the wl_seat is moved,
+        reporting its current position in output logical coordinates, see
+        xdg_output.logical_size.
+
+        If the pointer is not on the given wl_output, this event is not sent.
+      </description>
+      <arg name="x" type="uint" summary="pointer position x coordinate"/>
+      <arg name="y" type="uint" summary="pointer position y coordinate"/>
+    </event>
+
+    <event name="cursor">
+      <description summary="reports a cursor image change">
+        This event is sent immediately after the pointer reporter is created,
+        every time a client calls wl_pointer.set_cursor, and every time the
+        pointer is moved on and off the given wl_output.
+
+        If the cursor is rendered as a hardware cursor and is visible on the
+        given wl_output, visible is set to 1 and the image may be obtained by
+        calling zwlr_screencopy_manager_v1.capture_cursor. Otherwise, it is
+        set to 0.
+      </description>
+      <arg name="visible" type="uint" summary="whether the cursor is visible"/>
+    </event>
+
+    <request name="destroy" type="destructor">
+      <description summary="delete this object">
+        Destroys this cursor reporter.
+      </description>
+    </request>
   </interface>
 </protocol>
