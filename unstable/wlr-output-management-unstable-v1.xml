@@ -115,7 +115,7 @@
       </description>
     </request>
 
-    <event name="finished">
+    <event name="finished" type="destructor">
       <description summary="the compositor has finished with the manager">
         This event indicates that the compositor is done sending manager events.
         The compositor will destroy the object immediately after sending this
