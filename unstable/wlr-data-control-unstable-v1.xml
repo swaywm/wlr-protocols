@@ -41,7 +41,7 @@
     interface version number is reset.
   </description>
 
-  <interface name="zwlr_data_control_manager_v1" version="2">
+  <interface name="zwlr_data_control_manager_v1" version="3">
     <description summary="manager to control data devices">
       This interface is a manager that allows creating per-seat data device
       controls.
@@ -71,7 +71,7 @@
     </request>
   </interface>
 
-  <interface name="zwlr_data_control_device_v1" version="2">
+  <interface name="zwlr_data_control_device_v1" version="3">
     <description summary="manage a data device for a seat">
       This interface allows a client to manage a seat's selection.
 
@@ -141,7 +141,7 @@
 
     <!-- Version 2 additions -->
 
-    <event name="primary_selection" since="2">
+    <event name="primary_selection" since="3">
       <description summary="advertise new primary selection">
         The primary_selection event is sent out to notify the client of a new
         wlr_data_control_offer for the primary selection for this device. The
@@ -183,9 +183,33 @@
       <entry name="used_source" value="1"
         summary="source given to set_selection or set_primary_selection was already used before"/>
     </enum>
+
+    <!-- Version 3 additions -->
+
+    <event name="selection_serial" since="3">
+      <description summary="copy data to the selection">
+        This should be sent by compositors before a selection event with an
+        increasing serial number.
+
+        This can be used by the client in partnership to set_selection_response
+        to indicate pairing of a selection event to a reply.
+      </description>
+      <arg name="serial" type="uint"/>
+    </event>
+
+    <event name="primary_selection_serial" since="3">
+      <description summary="copy data to the selection">
+        This should be sent by compositors before a primary_selection event
+        with an increasing serial number.
+
+        This can be used by the client in partnership to set_selection_response
+        to indicate pairing of a selection event to a reply.
+      </description>
+      <arg name="serial" type="uint"/>
+    </event>
   </interface>
 
-  <interface name="zwlr_data_control_source_v1" version="1">
+  <interface name="zwlr_data_control_source_v1" version="3">
     <description summary="offer to transfer data">
       The wlr_data_control_source object is the source side of a
       wlr_data_control_offer. It is created by the source client in a data
@@ -233,9 +257,25 @@
         The client should clean up and destroy this data source.
       </description>
     </event>
+
+    <!-- Version 3 additions -->
+
+    <request name="serial" since="3">
+      <description summary="Specifies the serial this event is in reply to">
+        Clients can optionally specify a serial for this source indicating that
+        it is in response to a previous data device event. For example a
+        clipboard manager updating the text after a a set_selection event with
+        an empty selection.
+        Compositors may disregard this set_selection event if it is deemed
+        outdated.
+      </description>
+      <arg name="serial" type="uint"
+        summary="Serial of this data source"/>
+    </request>
+
   </interface>
 
-  <interface name="zwlr_data_control_offer_v1" version="1">
+  <interface name="zwlr_data_control_offer_v1" version="3">
     <description summary="offer to transfer data">
       A wlr_data_control_offer represents a piece of data offered for transfer
       by another client (the source client). The offer describes the different
