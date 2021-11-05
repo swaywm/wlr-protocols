@@ -98,6 +98,40 @@
         are not affected.
       </description>
     </request>
+
+    <!-- Version 4 additions -->
+
+    <event name="new_output" since="4">
+      <description summary="notify of a new wl_output">
+        This event indicates that one or more new outputs have been
+        created. All clients must send an ack_new_output request in response
+        to this event. If a client wishes to create a new layer surface in
+        response to the new output(s), it must make an ack_new_output request
+        with the provided serial after creating any new layer surfaces using
+        the get_layer_surface request and before the first commit on any of
+        the new surfaces. If the client does not wish to create a new layer
+        surface, it should ack immediately.
+
+        This allows the compositor to wait until new layer surfaces are ready
+        before rendering the first frame of new outputs, avoiding a race that
+        could cause imperfect frames.
+      </description>
+      <arg name="serial" type="uint"/>
+    </event>
+
+    <request name="ack_new_output" since="4">
+      <description summary="ack a new_output event">
+        This request informs the server that the client has created all
+        layer surfaces it intends to create in response to the new output(s).
+        These new layer surfaces are associated only with this ack sequence
+        and do *not* carry over to following ack sequences should any occur
+        before the first commit on the surfaces.
+
+        If the client receives multiple new_output events before it
+        can respond to one, it only has to ack the last new_output event.
+      </description>
+      <arg name="serial" type="uint" summary="serial from a new_output event"/>
+    </request>
   </interface>
 
   <interface name="zwlr_layer_surface_v1" version="4">
